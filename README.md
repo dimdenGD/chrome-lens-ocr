@@ -31,3 +31,20 @@ Options can be empty, or contain the following (default values):
   headers: {}, // you can add headers here, they'll override the default ones
 }
 ```
+
+## Custom Sharex OCR
+1. Install Node.js LTS from https://nodejs.org/en  
+2. Download this repo somewhere safe and extract it  
+![screenshot](https://lune.dimden.dev/eaab7598004e.png)  
+3. Go to the extracted folder and Shift+Right Click -> Open PowerShell window here  
+4. Run `npm i` and wait for it to finish  
+5. Open Sharex and go to Task settings -> Actions -> Add... and set it up like this:  
+![screenshot](https://lune.dimden.dev/be6e107ab9b7.png)  
+Except instead of  
+- `D:\Node.js\node.exe` you should put the path to your Node.js installation  
+- `D:\JS\ChromeLensApi\` part you should put the path to the extracted folder.  
+6. Save it, and make sure checkbox for "lens" is checked.  
+7. Now go to Hotkey settings and create a new hotkey for "Capture region (Light)". Then open settings and set Task like this:  
+![screenshot](https://lune.dimden.dev/f9418f337639.png)  
+8. Go to Actions settings and check "Override actions" option and also check "lens" action.
+9. Now you can use your hotkey to capture a region and it will OCR it using Google Lens API.
