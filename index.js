@@ -82,7 +82,36 @@ export default class Lens {
             body: formdata,
         });
 
-        return response.text();
+        const af_data = this.getAFData(await response.text());
+        const full_text = this.getFullText(af_data);
+
+        return full_text;
+    }
+
+    getAFData(text) {
+        const callbacks = text.match(/AF_initDataCallback\((\{.*?\})\)/gms);
+        const lens_callback = callbacks.find(c => c.includes('DetectedObject'));
+
+        if(!lens_callback) {
+            console.log(callbacks);
+            throw new Error('Could not find matching AF_initDataCallback');
+        }
+
+        const match = lens_callback.match(/AF_initDataCallback\((\{.*?\})\)/ms);
+
+        return eval(`(${match[1]})`);
+    }
+    getFullText(af_data) {
+        const data = af_data.data;
+        const full_text_part = data[3];
+
+        const language = full_text_part[3];
+        const text_parts = full_text_part[4][0][0];
+    
+        return {
+            language,
+            text_segments: text_parts
+        };
     }
 
     async scanByFile(path) {

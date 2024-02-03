@@ -1,14 +1,14 @@
-# Chrome Lens API
+# Chrome Lens OCR
 Package to use Google Lens OCR for free, via API used in Chromium.
 
 ## Installation
 ```bash
-npm i chrome-lens-api
+npm i chrome-lens-ocr
 ```
 
 ## Usage
 ```javascript
-import Lens from 'chrome-lens-api';
+import Lens from 'chrome-lens-ocr';
 
 const lens = new Lens();
 

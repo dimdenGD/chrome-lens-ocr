@@ -1,7 +1,7 @@
 {
-  "name": "chrome-lens-api",
+  "name": "chrome-lens-ocr",
   "version": "1.0.0",
-  "description": "Package to use Google Lens for free, via API used in Chrome.",
+  "description": "Package to use Google Lens OCR for free, via API used in Chrome.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,7 +9,7 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dimdenGD/chrome-lens-api.git"
+    "url": "git+https://github.com/dimdenGD/chrome-lens-ocr.git"
   },
   "keywords": [
     "google",
@@ -24,9 +24,9 @@
   "author": "dimden.dev",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/dimdenGD/chrome-lens-api/issues"
+    "url": "https://github.com/dimdenGD/chrome-lens-ocr/issues"
   },
-  "homepage": "https://github.com/dimdenGD/chrome-lens-api#readme",
+  "homepage": "https://github.com/dimdenGD/chrome-lens-ocr#readme",
   "dependencies": {
     "file-type": "^19.0.0",
     "image-dimensions": "^2.3.0"
