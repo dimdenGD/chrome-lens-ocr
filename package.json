@@ -29,6 +29,7 @@
   "homepage": "https://github.com/dimdenGD/chrome-lens-ocr#readme",
   "dependencies": {
     "file-type": "^19.0.0",
-    "image-dimensions": "^2.3.0"
+    "image-dimensions": "^2.3.0",
+    "sharp": "^0.33.2"
   }
 }

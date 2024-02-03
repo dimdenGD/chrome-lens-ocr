@@ -2,6 +2,6 @@ import Lens from './index.js';
 
 const lens = new Lens();
 
-lens.scanByURL('https://pbs.twimg.com/media/GFaoSKAXkAAcP7V.jpg?name=orig').then(t => {
+lens.scanByFile('shrimple.png').then(t => {
     console.log(t);
 }).catch(console.error);

@@ -2,6 +2,7 @@ import fs from 'fs';
 import { fileTypeFromBuffer } from 'file-type';
 import { imageDimensionsFromData } from 'image-dimensions';
 import { LENS_ENDPOINT, MIME_TO_EXT, SUPPORTED_MIMES } from './consts.js';
+import sharp from 'sharp';
 
 const setDefault = (obj, key, value) => {
     if(!obj[key]) {
@@ -132,13 +133,29 @@ export default class Lens {
             name = `image.${ext}`;
         }
 
-        const file = new File([buffer], name, { type: fileType.mime });
-        const formdata = new FormData();
         const dimensions = imageDimensionsFromData(Uint8Array.from(buffer));
-
         if(!dimensions) {
             throw new Error('Could not determine image dimensions');
         }
+
+        if(dimensions.width > 1000 || dimensions.height > 1000) {
+            buffer = await sharp(buffer)
+                .resize(1000, 1000, { fit: "inside" })
+                .withMetadata()
+                .jpeg({ quality: 90, progressive: true })
+                .toBuffer();
+            
+            let newDimensions = imageDimensionsFromData(Uint8Array.from(buffer));
+            if(!newDimensions) {
+                throw new Error('Could not determine new image dimensions');
+            }
+
+            dimensions.width = newDimensions.width;
+            dimensions.height = newDimensions.height;
+        }
+
+        const file = new File([buffer], name, { type: fileType.mime });
+        const formdata = new FormData();
 
         formdata.append('encoded_image', file);
         formdata.append('original_width', dimensions.width);
