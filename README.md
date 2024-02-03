@@ -39,7 +39,7 @@ It's possible to use this package with Sharex to OCR images using Google Lens AP
 2. Download this repo somewhere safe and extract it  
 ![screenshot](https://lune.dimden.dev/eaab7598004e.png)  
 3. Go to the extracted folder and Shift+Right Click -> Open PowerShell window here  
-4. Run `npm i` and wait for it to finish  
+4. Run `npm install` and wait for it to finish  
 5. Now open Sharex window and go to Hotkey settings and create a new hotkey for "Capture region (Light)". Then open that hotkey setting menu and set Task like this:  
 ![screenshot](https://lune.dimden.dev/11f3777b3885.png)  
 6. Now go to Actions and check "Override actions", then press Add... and set it up like this:  
