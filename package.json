@@ -1,0 +1,34 @@
+{
+  "name": "chrome-lens-api",
+  "version": "1.0.0",
+  "description": "Package to use Google Lens for free, via API used in Chrome.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dimdenGD/chrome-lens-api.git"
+  },
+  "keywords": [
+    "google",
+    "lens",
+    "lens",
+    "chrome",
+    "lens",
+    "reverse",
+    "engineering",
+    "free"
+  ],
+  "author": "dimden.dev",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dimdenGD/chrome-lens-api/issues"
+  },
+  "homepage": "https://github.com/dimdenGD/chrome-lens-api#readme",
+  "dependencies": {
+    "file-type": "^19.0.0",
+    "image-dimensions": "^2.3.0"
+  }
+}
