@@ -48,4 +48,4 @@ Except instead of
 - `D:\Node.js\node.exe` you should put the path to your Node.js installation  
 - `D:\JS\ChromeLensApi\` part you should put the path to the extracted folder (with `sharex.js` part included at the end).  
 7. Save it, and make sure "lens" is checked. Now you can close the settings and setup the hotkey to your liking.
-9. Now you can use your hotkey to capture a region and it will OCR it using Google Lens API.
+9. Now you can use your hotkey to capture a region and it will OCR it using Google Lens API (once it shows screenshot on your screen, text should be copied to your clipboard).
