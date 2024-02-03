@@ -16,6 +16,7 @@ lens.scanByFile('shrimple.png').then(console.log).catch(console.error);
 lens.scanByURL('https://lune.dimden.dev/7949f833fa42.png').then(console.log).catch(console.error); // this will fetch the image and then scan it
 lens.scanByBuffer(Buffer.from('...')).then(console.log).catch(console.error);
 ```
+All methods above return `{ language: String, text_segments: Array<String> }` object. Language is 2-letter ISO code, text_segments is an array of strings, each representing a line of text.
 
 ## Options
 Options can be empty, or contain the following (default values):
