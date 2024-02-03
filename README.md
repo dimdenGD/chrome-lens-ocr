@@ -33,6 +33,8 @@ Options can be empty, or contain the following (default values):
 ```
 
 ## Custom Sharex OCR
+It's possible to use this package with Sharex to OCR images using Google Lens API, instead of bad default OCR in sharex. Here's how to do it:  
+  
 1. Install Node.js LTS from https://nodejs.org/en  
 2. Download this repo somewhere safe and extract it  
 ![screenshot](https://lune.dimden.dev/eaab7598004e.png)  
