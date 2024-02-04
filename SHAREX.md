@@ -1,6 +1,7 @@
 ## Custom Sharex OCR
 It's possible to use this package with Sharex to OCR images using Google Lens API, instead of bad default OCR in Sharex. Here's how to do it:  
   
+0. Get [Sharex](https://getsharex.com/) if you don't have it already.
 1. Install Node.js LTS from https://nodejs.org/en (make sure to check "Add to PATH" during installation)  
 2. Download this repo somewhere safe and extract it  
 ![screenshot](https://lune.dimden.dev/eaab7598004e.png)  

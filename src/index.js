@@ -268,6 +268,7 @@ export default class Lens {
             throw new Error('Could not determine image dimensions');
         }
 
+        // Google Lens does not accept images larger than 1000x1000
         if(dimensions.width > 1000 || dimensions.height > 1000) {
             buffer = await sharp(buffer)
                 .resize(1000, 1000, { fit: "inside" })
