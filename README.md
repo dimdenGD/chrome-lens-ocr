@@ -20,20 +20,20 @@ lens.scanByBuffer(Buffer.from('...')).then(console.log).catch(console.error);
 All methods above return `{ language: String, text_segments: Array<String> }` object. Language is 2-letter ISO code, text_segments is an array of strings, each representing a line of text. In case error happened during the process, `LensError` will be thrown (instance of it is exported in the module).
 
 ## Methods and properties
-#### `scanByFile(path: String, dispatcher: undici.Dispatcher): Promise<{ language: String, text_segments: Array<String> }>`
+#### `scanByFile(path: String): Promise<{ language: String, text_segments: Array<String> }>`
 Scans an image from a file.
 
-#### `scanByURL(url: String, dispatcher: undici.Dispatcher): Promise<{ language: String, text_segments: Array<String> }>`
+#### `scanByURL(url: String): Promise<{ language: String, text_segments: Array<String> }>`
 Downloads an image from a URL and then scans it.
 
-#### `scanByBuffer(buffer: Buffer, file_name: String, dispatcher: undici.Dispatcher): Promise<{ language: String, text_segments: Array<String> }>`
+#### `scanByBuffer(buffer: Buffer, file_name: String): Promise<{ language: String, text_segments: Array<String> }>`
 Scans an image from a buffer. `file_name` is optional, but it's recommended to provide it.
 
 #### `updateOptions(options: Object): void`
 Updates the options for the instance.
 
-#### `fetch(formdata: FormData, dispatcher: undici.Dispatcher): Promise<{ language: String, text_segments: Array<String> }>`
-Internal method to send a request to the API. You can use it to send a custom request, but you'll have to handle the formdata yourself. By default, `dispatcher` is set to `options.dispatcher`.
+#### `fetch(formdata: FormData): Promise<{ language: String, text_segments: Array<String> }>`
+Internal method to send a request to the API. You can use it to send a custom request, but you'll have to handle the formdata yourself.
 
 #### cookies
 This property contains object with cookies that are set for the instance. You can use it to save and load cookies to avoid doing the consent process every time.
