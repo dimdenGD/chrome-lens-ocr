@@ -3,6 +3,7 @@ import { fileTypeFromBuffer } from 'file-type';
 import { imageDimensionsFromData } from 'image-dimensions';
 import { LENS_ENDPOINT, MIME_TO_EXT, SUPPORTED_MIMES } from './consts.js';
 import sharp from 'sharp';
+import { fetch } from 'undici';
 
 const setDefault = (obj, key, value) => {
     if(!obj[key]) {
@@ -12,8 +13,13 @@ const setDefault = (obj, key, value) => {
 
 export default class Lens {
     constructor(config = {}) {
-        const chromeVersion = '121.0.6167.140';
-        const majorChromeVersion = chromeVersion.split('.')[0];
+        if(typeof config !== 'object') {
+            console.warn('Lens constructor expects an object, got', typeof config);
+            config = {};
+        }
+
+        const chromeVersion = config?.chromeVersion ?? '121.0.6167.140';
+        const majorChromeVersion = config?.chromeVersion?.split('.')[0] ?? chromeVersion.split('.')[0];
 
         setDefault(config, 'chromeVersion', chromeVersion);
         setDefault(config, 'majorChromeVersion', majorChromeVersion);
@@ -24,6 +30,12 @@ export default class Lens {
         setDefault(config, 'headers', {});
 
         this.config = config;
+    }
+
+    updateOptions(options) {
+        for(const key in options) {
+            this.config[key] = options[key];
+        }
     }
 
     async fetch(formdata) {
@@ -81,6 +93,7 @@ export default class Lens {
             method: 'POST',
             headers,
             body: formdata,
+            dispatcher: this.config.dispatcher
         });
 
         const af_data = this.getAFData(await response.text());
@@ -106,12 +119,9 @@ export default class Lens {
         const data = af_data.data;
         const full_text_part = data[3];
 
-        const language = full_text_part[3];
-        const text_parts = full_text_part[4][0][0];
-    
         return {
-            language,
-            text_segments: text_parts
+            language: full_text_part[3],
+            text_segments: full_text_part[4][0][0]
         };
     }
 

@@ -1,5 +1,6 @@
 # Chrome Lens OCR
-Package to use Google Lens OCR for free, via API used in Chromium.
+Library to use Google Lens OCR for free, via API used in Chromium. This doesn't require running a headless browser, and is much faster than using Puppeteer or similar.
+It's set up to work without any options, there's no need to be authorized.
 
 ## Installation
 ```bash
@@ -18,34 +19,55 @@ lens.scanByBuffer(Buffer.from('...')).then(console.log).catch(console.error);
 ```
 All methods above return `{ language: String, text_segments: Array<String> }` object. Language is 2-letter ISO code, text_segments is an array of strings, each representing a line of text.
 
+## Methods
+#### `scanByFile(path: String): Promise<{ language: String, text_segments: Array<String> }>`
+Scans an image from a file.
+
+#### `scanByURL(url: String): Promise<{ language: String, text_segments: Array<String> }>`
+Downloads an image from a URL and then scans it.
+
+#### `scanByBuffer(buffer: Buffer, file_name: String): Promise<{ language: String, text_segments: Array<String> }>`
+Scans an image from a buffer. `file_name` is optional, but it's recommended to provide it.
+
+#### `updateOptions(options: Object): void`
+Updates the options for the instance.
+
+#### `fetch(formdata: FormData): Promise<{ language: String, text_segments: Array<String> }>`
+Internal method to send a request to the API. You can use it to send a custom request, but you'll have to handle the formdata yourself.
+
+## Using proxy
+You can use undici dispatcher to proxy requests. Here's an example:
+```javascript
+import Lens from 'chrome-lens-ocr';
+import { ProxyAgent } from 'undici';
+
+const lens = new Lens({
+    dispatcher: new ProxyAgent('http://example:example@example.com:8080')
+});
+```
+
+## Using your cookies
+You can use your own cookies to be authorized in Google. This is optional. Here's an example:
+```javascript
+import Lens from 'chrome-lens-ocr';
+
+const lens = new Lens({
+    headers: {
+        'cookie': 'your_cookies_here'
+    }
+});
+```
+
 ## Options
 Options can be empty, or contain the following (default values):
 ```javascript
 {
   chromeVersion: '121.0.6167.140', // Version of Chromium to "use"
-  majorChromeVersion: '121', // Major version of Chromium to "use", should match the previous value
-  sbisrc: 'Google Chrome 121.0.6167.140 (Official) Windows', // browser string to use, version should match the previous value
-  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', // user agent to use, version should match the previous value
-  endpoint: LENS_ENDPOINT, // endpoint to use, probably should not be changed
-  viewport: [1920, 1080], // viewport to use, probably should not be changed
+  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', // user agent to use, major Chrome version should match the previous value
   headers: {}, // you can add headers here, they'll override the default ones
+  dispatcher: undefined, // you can use undici dispatcher to proxy requests
 }
 ```
 
 ## Custom Sharex OCR
-It's possible to use this package with Sharex to OCR images using Google Lens API, instead of bad default OCR in Sharex. Here's how to do it:  
-  
-1. Install Node.js LTS from https://nodejs.org/en (make sure to check "Add to PATH" during installation)  
-2. Download this repo somewhere safe and extract it  
-![screenshot](https://lune.dimden.dev/eaab7598004e.png)  
-3. Go to the extracted folder and Shift+Right Click -> Open PowerShell window here  
-4. Run `npm install` and wait for it to finish  
-5. Now open Sharex window and go to Hotkey settings and create a new hotkey for "Capture region (Light)". Then open that hotkey setting menu and set Task like this:  
-![screenshot](https://lune.dimden.dev/11f3777b3885.png)  
-6. Now go to Actions and check "Override actions", then press Add... and set it up like this:  
-![screenshot](https://lune.dimden.dev/fb8a14c1014f.png)  
-Except instead of  
-- `D:\Node.js\node.exe` you should put the path to your Node.js installation  
-- `D:\JS\ChromeLensApi\` part you should put the path to the extracted folder (with `sharex.js` part included at the end).  
-7. Save it, and make sure "lens" is checked. Now you can close the settings and setup the hotkey to your liking.
-9. Now you can use your hotkey to capture a region and it will OCR it using Google Lens API (once it shows screenshot on your screen, text should be copied to your clipboard).
+It's possible to use this package with Sharex to OCR images using Google Lens API, instead of bad default OCR in Sharex. Please refer to [SHAREX.md](SHAREX.md) for instructions.
