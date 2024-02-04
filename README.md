@@ -35,7 +35,7 @@ Updates the options for the instance.
 #### `fetch(formdata: FormData): Promise<{ language: String, text_segments: Array<String> }>`
 Internal method to send a request to the API. You can use it to send a custom request, but you'll have to handle the formdata yourself.
 
-#### cookies
+#### `cookies`
 This property contains object with cookies that are set for the instance. You can use it to save and load cookies to avoid doing the consent process every time.
 
 ## Using proxy
@@ -86,7 +86,7 @@ Options can be empty, or contain the following (default values):
 ```
 
 ## Additional information
-In some of the EU countries, using any Google services requires cookie consent. This library handles it automatically, but it's pretty slow. Every new instance will need to do this every single time, so it's better to save cookies somewhere after request and load them into new instances. There's an example of how to do it in [sharex.js](sharex.js).
+In some of the EU countries, using any Google services requires cookie consent. This library handles it automatically, but it's pretty slow on first scan of the instance. Every new instance will need to do this every single time, so if you make a lot of new instances or always need it to be fast on first launch, you need to save cookies somewhere to avoid this. There's an example of how to do it in [sharex.js](sharex.js).
 
 ## Custom Sharex OCR
 It's possible to use this package with Sharex to OCR images using Google Lens API, instead of bad default OCR in Sharex. Please refer to [SHAREX.md](SHAREX.md) for instructions.
