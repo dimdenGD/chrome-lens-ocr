@@ -44,14 +44,9 @@ You can use undici dispatcher to proxy requests. Here's an example:
 import Lens from 'chrome-lens-ocr';
 import { ProxyAgent } from 'undici';
 
-const agent = new ProxyAgent('http://user:pass@example.com:8080');
-
 const lens = new Lens({
-    dispatcher: agent // will use the proxy for all requests
+    dispatcher: new ProxyAgent('http://user:pass@example.com:8080')
 });
-
-// or include it as last argument in any scan method
-lens.scanByFile('shrimple.png', agent).then(console.log).catch(console.error);
 ```
 
 ## Using your cookies
