@@ -86,7 +86,7 @@ Options can be empty, or contain the following (default values):
 ```
 
 ## Additional information
-In some of the EU countries, using any Google services requires cookie consent. This library handles it automatically, but it's pretty slow on first scan of the instance. So if you make a lot of new instances or always need it to be fast on first launch, you need to save cookies somewhere to avoid this. There's an example of how to do it in [sharex.js](sharex.js).
+In some of the EU countries, using any Google services requires cookie consent. This library handles it automatically, but it's pretty slow on first scan of the instance. So if you make a lot of new instances or always need it to be fast on first launch, you need to save cookies somewhere to avoid this. There's an example of how to do it in [https://github.com/dimdenGD/chrome-lens-ocr/blob/main/sharex.js](sharex.js).
 
 ## Custom Sharex OCR
-It's possible to use this package with Sharex to OCR images using Google Lens API, instead of bad default OCR in Sharex. Please refer to [SHAREX.md](SHAREX.md) for instructions.
+It's possible to use this package with Sharex to OCR images using Google Lens API, instead of bad default OCR in Sharex. Please refer to [https://github.com/dimdenGD/chrome-lens-ocr/blob/main/SHAREX.md](SHAREX.md) for instructions.
