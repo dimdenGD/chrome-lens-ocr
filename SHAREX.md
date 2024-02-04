@@ -17,3 +17,6 @@ Except instead of
 9. Now you can use your hotkey to capture a region and it will OCR it using Google Lens API (once it shows screenshot on your screen, text should be copied to your clipboard).
   
 ![gif](https://lune.dimden.dev/1bf28abae5b0.gif)
+
+## Troubleshooting
+If it doesn't copy anything for you, there might be some error happening in `sharex.js` script. You can turn off "Hidden window" in "lens" Action settings and run the hotkey again to see the error.  
