@@ -17,23 +17,26 @@ lens.scanByFile('shrimple.png').then(console.log).catch(console.error);
 lens.scanByURL('https://lune.dimden.dev/7949f833fa42.png').then(console.log).catch(console.error); // this will fetch the image and then scan it
 lens.scanByBuffer(Buffer.from('...')).then(console.log).catch(console.error);
 ```
-All methods above return `{ language: String, text_segments: Array<String> }` object. Language is 2-letter ISO code, text_segments is an array of strings, each representing a line of text.
+All methods above return `{ language: String, text_segments: Array<String> }` object. Language is 2-letter ISO code, text_segments is an array of strings, each representing a line of text. In case error happened during the process, `LensError` will be thrown (instance of it is exported in the module).
 
-## Methods
-#### `scanByFile(path: String): Promise<{ language: String, text_segments: Array<String> }>`
+## Methods and properties
+#### `scanByFile(path: String, dispatcher: undici.Dispatcher): Promise<{ language: String, text_segments: Array<String> }>`
 Scans an image from a file.
 
-#### `scanByURL(url: String): Promise<{ language: String, text_segments: Array<String> }>`
+#### `scanByURL(url: String, dispatcher: undici.Dispatcher): Promise<{ language: String, text_segments: Array<String> }>`
 Downloads an image from a URL and then scans it.
 
-#### `scanByBuffer(buffer: Buffer, file_name: String): Promise<{ language: String, text_segments: Array<String> }>`
+#### `scanByBuffer(buffer: Buffer, file_name: String, dispatcher: undici.Dispatcher): Promise<{ language: String, text_segments: Array<String> }>`
 Scans an image from a buffer. `file_name` is optional, but it's recommended to provide it.
 
 #### `updateOptions(options: Object): void`
 Updates the options for the instance.
 
-#### `fetch(formdata: FormData): Promise<{ language: String, text_segments: Array<String> }>`
-Internal method to send a request to the API. You can use it to send a custom request, but you'll have to handle the formdata yourself.
+#### `fetch(formdata: FormData, dispatcher: undici.Dispatcher): Promise<{ language: String, text_segments: Array<String> }>`
+Internal method to send a request to the API. You can use it to send a custom request, but you'll have to handle the formdata yourself. By default, `dispatcher` is set to `options.dispatcher`.
+
+#### cookies
+This property contains object with cookies that are set for the instance. You can use it to save and load cookies to avoid doing the consent process every time.
 
 ## Using proxy
 You can use undici dispatcher to proxy requests. Here's an example:
@@ -41,9 +44,14 @@ You can use undici dispatcher to proxy requests. Here's an example:
 import Lens from 'chrome-lens-ocr';
 import { ProxyAgent } from 'undici';
 
+const agent = new ProxyAgent('http://user:pass@example.com:8080');
+
 const lens = new Lens({
-    dispatcher: new ProxyAgent('http://example:example@example.com:8080')
+    dispatcher: agent // will use the proxy for all requests
 });
+
+// or include it as last argument in any scan method
+lens.scanByFile('shrimple.png', agent).then(console.log).catch(console.error);
 ```
 
 ## Using your cookies
@@ -53,7 +61,20 @@ import Lens from 'chrome-lens-ocr';
 
 const lens = new Lens({
     headers: {
-        'cookie': 'your_cookies_here'
+        // 'cookie' is the only 'special' header that can accept an object, all other headers should be strings
+        'cookie': '__Secure-ENID=17.SE=-dizH-; NID=511=---bcDwC4fo0--lgfi0n2-' // way #1
+        'cookie': { // way #2, better because you can set expiration date and it will be automatically handled, all 3 fields are required in this way
+            '__Secure-ENID': {
+                name: '__Secure-ENID',
+                value: '17.SE=-dizH-',
+                expires: 1634025600,
+            },
+            'NID': {
+                name: 'NID',
+                value: '511=---bcDwC4fo0--lgfi0n2-',
+                expires: 1634025600,
+            }
+        }
     }
 });
 ```
@@ -68,6 +89,9 @@ Options can be empty, or contain the following (default values):
   dispatcher: undefined, // you can use undici dispatcher to proxy requests
 }
 ```
+
+## Additional information
+In some of the EU countries, using any Google services requires cookie consent. This library handles it automatically, but it's pretty slow. Every new instance will need to do this every single time, so it's better to save cookies somewhere after request and load them into new instances. There's an example of how to do it in [sharex.js](sharex.js).
 
 ## Custom Sharex OCR
 It's possible to use this package with Sharex to OCR images using Google Lens API, instead of bad default OCR in Sharex. Please refer to [SHAREX.md](SHAREX.md) for instructions.
