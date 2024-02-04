@@ -56,7 +56,7 @@ import Lens from 'chrome-lens-ocr';
 
 const lens = new Lens({
     headers: {
-        // 'cookie' is the only 'special' header that can accept an object, all other headers should be strings
+        // 'cookie' is the only 'special' header that can also accept an object, all other headers should be strings
         'cookie': '__Secure-ENID=17.SE=-dizH-; NID=511=---bcDwC4fo0--lgfi0n2-' // way #1
         'cookie': { // way #2, better because you can set expiration date and it will be automatically handled, all 3 fields are required in this way
             '__Secure-ENID': {
