@@ -86,11 +86,11 @@ const lens = new Lens({
 ## Headless
 You can use this library in environments which don't support Node.js API's by importing only the core, which doesn't include the "scanBy" utility functions:
 ```javascript
-import LensCore from 'chrome-lens-ocr/src/core.js'
+import LensCore from 'chrome-lens-ocr/src/core.js';
 
-const lens = new Lens()
-lens.scanByData(new Uint8Array([41, 40, 236, 244, 151, 101, 118, 16, 37, 138, 199, 229, 2, 75, 33]), 'myImage.png', 'image/png')
-
+const lens = new LensCore();
+lens.scanByData(new Uint8Array([41, 40, 236, 244, 151, 101, 118, 16, 37, 138, 199, 229, 2, 75, 33]), 'myImage.png', 'image/png');
+```
 
 ## Options
 Options can be empty, or contain the following (default values):
@@ -99,8 +99,8 @@ Options can be empty, or contain the following (default values):
   chromeVersion: '121.0.6167.140', // Version of Chromium to "use"
   userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', // user agent to use, major Chrome version should match the previous value
   headers: {}, // you can add headers here, they'll override the default ones
-  dispatcher: undefined, // you can use undici dispatcher to proxy requests if using node 16 or later
-  agent: undefined, // you can use http agent to proxy requests if using node-fetch before node 16 polyfilled globally
+  dispatcher: undefined, // you can use undici dispatcher to proxy requests if using node 18 or later with built-in fetch
+  agent: undefined, // you can use http agent to proxy requests if using node-fetch before node 18
 }
 ```
 
