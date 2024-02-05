@@ -30,10 +30,10 @@
   "homepage": "https://github.com/dimdenGD/chrome-lens-ocr#readme",
   "dependencies": {
     "clipboardy": "^4.0.0",
+    "cross-fetch-ponyfill": "^1.0.3",
     "file-type": "^19.0.0",
     "image-dimensions": "^2.3.0",
     "set-cookie-parser": "^2.6.0",
-    "sharp": "^0.33.2",
-    "undici": "^6.6.0"
+    "sharp": "^0.33.2"
   }
 }

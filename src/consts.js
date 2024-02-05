@@ -1,4 +1,4 @@
-export const LENS_ENDPOINT = 'https://lens.google.com/v3/upload';
+export const LENS_ENDPOINT = 'https://lens.google.com/v3/upload'
 
 // ico, bmp, jfif, pjpeg, jpeg, pjp, jpg, png, tif, tiff, webp, heic
 export const SUPPORTED_MIMES = [

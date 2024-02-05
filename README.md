@@ -39,13 +39,22 @@ Internal method to send a request to the API. You can use it to send a custom re
 This property contains object with cookies that are set for the instance. You can use it to save and load cookies to avoid doing the consent process every time.
 
 ## Using proxy
-You can use undici dispatcher to proxy requests. Here's an example:
+You can use undici dispatcher to proxy requests if using Node 18 or newer. Here's an example:
 ```javascript
 import Lens from 'chrome-lens-ocr';
 import { ProxyAgent } from 'undici';
 
 const lens = new Lens({
     dispatcher: new ProxyAgent('http://user:pass@example.com:8080')
+});
+```
+If you're using versions prior to Node 18 you need to use the http proxy:
+```javascript
+import Lens from 'chrome-lens-ocr';
+import { HttpProxyAgent } from 'http-proxy-agent';
+
+const lens = new Lens({
+    agent: new HttpProxyAgent('http://user:pass@example.com:8080')
 });
 ```
 
@@ -74,6 +83,15 @@ const lens = new Lens({
 });
 ```
 
+## Headless
+You can use this library in environments which don't support Node.js API's by importing only the core, which doesn't include the "scanBy" utility functions:
+```javascript
+import LensCore from 'chrome-lens-ocr/src/core.js'
+
+const lens = new Lens()
+lens.scanByData(new Uint8Array([41, 40, 236, 244, 151, 101, 118, 16, 37, 138, 199, 229, 2, 75, 33]), 'myImage.png', 'image/png')
+
+
 ## Options
 Options can be empty, or contain the following (default values):
 ```javascript
@@ -81,7 +99,8 @@ Options can be empty, or contain the following (default values):
   chromeVersion: '121.0.6167.140', // Version of Chromium to "use"
   userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', // user agent to use, major Chrome version should match the previous value
   headers: {}, // you can add headers here, they'll override the default ones
-  dispatcher: undefined, // you can use undici dispatcher to proxy requests
+  dispatcher: undefined, // you can use undici dispatcher to proxy requests if using node 16 or later
+  agent: undefined, // you can use http agent to proxy requests if using node-fetch before node 16 polyfilled globally
 }
 ```
 
