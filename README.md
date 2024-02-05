@@ -74,14 +74,15 @@ const lens = new Lens({
 });
 ```
 
-## Headless
-You can use this library in environments which don't support Node.js API's by importing only the core, which doesn't include the "scanBy" utility functions:
+## Using in other environments
+You can use this library in environments that don't support Node.js APIs by importing only the core, which doesn't include other "scanBy" utility functions:
 ```javascript
 import LensCore from 'chrome-lens-ocr/src/core.js';
 
 const lens = new LensCore();
 lens.scanByData(new Uint8Array([41, 40, 236, 244, 151, 101, 118, 16, 37, 138, 199, 229, 2, 75, 33]), 'myImage.png', 'image/png');
 ```
+But in this case, you'll need to handle resizing images to less than 1000x1000 dimensions yourself, as larger images aren't supported by Google Lens.
 
 ## Options
 Options can be empty, or contain the following (default values):
