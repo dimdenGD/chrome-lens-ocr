@@ -48,7 +48,6 @@ const lens = new Lens({
     dispatcher: new ProxyAgent('http://user:pass@example.com:8080')
 });
 ```
-```
 
 ## Using your cookies
 You can use your own cookies to be authorized in Google. This is optional. Here's an example:
