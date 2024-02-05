@@ -1,24 +1,24 @@
-import { imageDimensionsFromData } from 'image-dimensions'
-import setCookie from 'set-cookie-parser'
+import { imageDimensionsFromData } from 'image-dimensions';
+import setCookie from 'set-cookie-parser';
 
-import { LENS_ENDPOINT, MIME_TO_EXT, SUPPORTED_MIMES } from './consts.js'
-import { parseCookies, sleep } from './utils.js'
+import { LENS_ENDPOINT, MIME_TO_EXT, SUPPORTED_MIMES } from './consts.js';
+import { parseCookies, sleep } from './utils.js';
 
 export default class LensCore {
-    #config = {}
-    cookies = {}
-    _fetch = globalThis.fetch && globalThis.fetch.bind(globalThis)
+    #config = {};
+    cookies = {};
+    _fetch = globalThis.fetch && globalThis.fetch.bind(globalThis);
 
     constructor (config = {}, fetch) {
         if (typeof config !== 'object') {
-            console.warn('Lens constructor expects an object, got', typeof config)
-            config = {}
+            console.warn('Lens constructor expects an object, got', typeof config);
+            config = {};
         }
 
-        if (fetch) this._fetch = fetch
+        if (fetch) this._fetch = fetch;
 
-        const chromeVersion = config?.chromeVersion ?? '121.0.6167.140'
-        const majorChromeVersion = config?.chromeVersion?.split('.')[0] ?? chromeVersion.split('.')[0]
+        const chromeVersion = config?.chromeVersion ?? '121.0.6167.140';
+        const majorChromeVersion = config?.chromeVersion?.split('.')[0] ?? chromeVersion.split('.')[0];
 
         this.#config = {
             chromeVersion,
@@ -29,68 +29,68 @@ export default class LensCore {
             viewport: [1920, 1080],
             headers: {},
             ...config
-        }
+        };
 
         // lowercase all headers
         for (const key in this.#config.headers) {
-            const value = this.#config.headers[key]
+            const value = this.#config.headers[key];
             if (!value) {
-                delete this.#config.headers[key]
-                continue
+                delete this.#config.headers[key];
+                continue;
             }
             if (key.toLowerCase() !== key) {
-                delete this.#config.headers[key]
-                this.#config.headers[key.toLowerCase()] = value
+                delete this.#config.headers[key];
+                this.#config.headers[key.toLowerCase()] = value;
             }
         }
 
-        this.#parseCookies()
+        this.#parseCookies();
     }
 
     #parseCookies () {
         if (this.#config?.headers?.cookie) {
             if (typeof this.#config?.headers?.cookie === 'string') {
                 // parse cookies from string
-                const cookies = parseCookies(this.#config.headers.cookie)
+                const cookies = parseCookies(this.#config.headers.cookie);
                 for (const cookie in cookies) {
                     this.cookies[cookie] = {
                         name: cookie,
                         value: cookies[cookie],
                         expires: Infinity
-                    }
+                    };
                 }
             } else {
-                this.cookies = this.#config.headers.cookie
+                this.cookies = this.#config.headers.cookie;
             }
         }
     }
 
     updateOptions (options) {
         for (const key in options) {
-            this.#config[key] = options[key]
+            this.#config[key] = options[key];
         }
 
-        this.#parseCookies()
+        this.#parseCookies();
     }
 
     async fetch (formdata, secondTry = false) {
-        const params = new URLSearchParams()
+        const params = new URLSearchParams();
 
-        params.append('s', '' + 4) // SurfaceProtoValue - Surface.CHROMIUM
-        params.append('re', 'df') // RenderingEnvironment - DesktopWebFullscreen
-        params.append('stcs', '' + Date.now()) // timestamp
-        params.append('vpw', this.#config.viewport[0]) // viewport width
-        params.append('vph', this.#config.viewport[1]) // viewport height
-        params.append('ep', 'subb') // EntryPoint
+        params.append('s', '' + 4); // SurfaceProtoValue - Surface.CHROMIUM
+        params.append('re', 'df'); // RenderingEnvironment - DesktopWebFullscreen
+        params.append('stcs', '' + Date.now()); // timestamp
+        params.append('vpw', this.#config.viewport[0]); // viewport width
+        params.append('vph', this.#config.viewport[1]); // viewport height
+        params.append('ep', 'subb'); // EntryPoint
 
-        const url = `${this.#config.endpoint}?${params.toString()}`
-        const headers = this.#generateHeaders()
+        const url = `${this.#config.endpoint}?${params.toString()}`;
+        const headers = this.#generateHeaders();
 
         for (const key in this.#config.headers) {
-            headers[key] = this.#config.headers[key]
+            headers[key] = this.#config.headers[key];
         }
 
-        this.#generateCookieHeader(headers)
+        this.#generateCookieHeader(headers);
 
         const response = await this._fetch(url, {
             method: 'POST',
@@ -99,61 +99,61 @@ export default class LensCore {
             dispatcher: this.#config.dispatcher,
             agent: this.#config.agent,
             redirect: 'manual'
-        })
+        });
 
-        const text = await response.text()
+        const text = await response.text();
 
-        this.#setCookies(response.headers.get('set-cookie'))
+        this.#setCookies(response.headers.get('set-cookie'));
 
         // in some of the EU countries, Google requires cookie consent
         if (response.status === 302) {
             if (secondTry) {
-                throw new LensError('Lens returned a 302 status code twice', response.status, response.headers, text)
+                throw new LensError('Lens returned a 302 status code twice', response.status, response.headers, text);
             }
 
-            const consentHeaders = this.#generateHeaders()
-            consentHeaders['Content-Type'] = 'application/x-www-form-urlencoded'
-            consentHeaders.Referer = 'https://consent.google.com/'
-            consentHeaders.Origin = 'https://consent.google.com'
+            const consentHeaders = this.#generateHeaders();
+            consentHeaders['Content-Type'] = 'application/x-www-form-urlencoded';
+            consentHeaders.Referer = 'https://consent.google.com/';
+            consentHeaders.Origin = 'https://consent.google.com';
 
-            this.#generateCookieHeader(consentHeaders)
+            this.#generateCookieHeader(consentHeaders);
 
-            const location = response.headers.get('Location')
+            const location = response.headers.get('Location');
 
-            if (!location) throw new Error('Location header not found')
+            if (!location) throw new Error('Location header not found');
 
-            const redirectLink = new URL(location)
-            const params = redirectLink.searchParams
-            params.append('x', '6')
-            params.append('set_eom', 'true')
-            params.append('bl', 'boq_identityfrontenduiserver_20240129.02_p0')
-            params.append('app', '0')
+            const redirectLink = new URL(location);
+            const params = redirectLink.searchParams;
+            params.append('x', '6');
+            params.append('set_eom', 'true');
+            params.append('bl', 'boq_identityfrontenduiserver_20240129.02_p0');
+            params.append('app', '0');
 
-            await sleep(500) // to not be suspicious
+            await sleep(500); // to not be suspicious
             const saveConsentRequest = await fetch('https://consent.google.com/save', {
                 method: 'POST',
                 headers: consentHeaders,
                 body: params.toString(),
                 redirect: 'manual'
-            })
+            });
 
             if (saveConsentRequest.status === 303) {
                 // consent was saved, save new cookies and retry the request
-                this.#setCookies(saveConsentRequest.headers.get('set-cookie'))
-                await sleep(500)
-                return this.fetch(formdata, true)
+                this.#setCookies(saveConsentRequest.headers.get('set-cookie'));
+                await sleep(500);
+                return this.fetch(formdata, true);
             }
         }
 
         if (response.status !== 200) {
-            throw new LensError('Lens returned a non-200 status code', response.status, response.headers, text)
+            throw new LensError('Lens returned a non-200 status code', response.status, response.headers, text);
         }
 
         try {
-            const afData = this.getAFData(text)
-            return this.getFullText(afData)
+            const afData = this.getAFData(text);
+            return this.getFullText(afData);
         } catch (e) {
-            throw new LensError('Could not parse response', response.status, response.headers, text)
+            throw new LensError('Could not parse response', response.status, response.headers, text);
         }
     }
 
@@ -192,89 +192,89 @@ export default class LensCore {
                     repeated int32 trigger_variation_id = [3372327, 3374107, 3374154];
                 }
             */
-        }
+        };
     }
 
     #generateCookieHeader (header) {
         if (Object.keys(this.cookies).length > 0) {
-            this.cookies = Object.fromEntries(Object.entries(this.cookies).filter(([name, cookie]) => cookie.expires > Date.now()))
+            this.cookies = Object.fromEntries(Object.entries(this.cookies).filter(([name, cookie]) => cookie.expires > Date.now()));
             header.cookie = Object.entries(this.cookies)
-                .map(([name, cookie]) => `${name}=${cookie.value}`).join('; ')
+                .map(([name, cookie]) => `${name}=${cookie.value}`).join('; ');
         }
     }
 
     #setCookies (combinedCookieHeader) {
-        const splitCookieHeaders = setCookie.splitCookiesString(combinedCookieHeader)
-        const cookies = setCookie.parse(splitCookieHeaders)
+        const splitCookieHeaders = setCookie.splitCookiesString(combinedCookieHeader);
+        const cookies = setCookie.parse(splitCookieHeaders);
 
         if (cookies.length > 0) {
             for (const cookie of cookies) {
-                this.cookies[cookie.name] = cookie
-                cookie.expires = cookie.expires.getTime()
+                this.cookies[cookie.name] = cookie;
+                cookie.expires = cookie.expires.getTime();
             }
         }
     }
 
     getAFData (text) {
-        const callbacks = text.match(/AF_initDataCallback\((\{.*?\})\)/gms)
-        const lensCallback = callbacks.find(c => c.includes('DetectedObject'))
+        const callbacks = text.match(/AF_initDataCallback\((\{.*?\})\)/gms);
+        const lensCallback = callbacks.find(c => c.includes('DetectedObject'));
 
         if (!lensCallback) {
-            console.log(callbacks)
-            throw new Error('Could not find matching AF_initDataCallback')
+            console.log(callbacks);
+            throw new Error('Could not find matching AF_initDataCallback');
         }
 
-        const match = lensCallback.match(/AF_initDataCallback\((\{.*?\})\)/ms)
+        const match = lensCallback.match(/AF_initDataCallback\((\{.*?\})\)/ms);
 
-        return eval(`(${match[1]})`)
+        return eval(`(${match[1]})`);
     }
 
     getFullText (afData) {
-        const data = afData.data
-        const fullTextPart = data[3]
+        const data = afData.data;
+        const fullTextPart = data[3];
 
         return {
             language: fullTextPart[3],
             text_segments: fullTextPart[4][0][0]
-        }
+        };
     }
 
     async scanByData (uint8, fileName, mime) {
         if (!SUPPORTED_MIMES.includes(mime)) {
-            throw new Error('File type not supported')
+            throw new Error('File type not supported');
         }
 
-        if (!fileName) fileName = `image.${MIME_TO_EXT[mime]}`
+        if (!fileName) fileName = `image.${MIME_TO_EXT[mime]}`;
 
-        const dimensions = imageDimensionsFromData(uint8)
+        const dimensions = imageDimensionsFromData(uint8);
         if (!dimensions) {
-            throw new Error('Could not determine image dimensions')
+            throw new Error('Could not determine image dimensions');
         }
 
-        const { width, height } = dimensions
+        const { width, height } = dimensions;
         // Google Lens does not accept images larger than 1000x1000
         if (width > 1000 || height > 1000) {
-            throw new Error('Image dimensions are larger than 1000x1000')
+            throw new Error('Image dimensions are larger than 1000x1000');
         }
 
-        const file = new File([uint8], fileName, { type: mime })
-        const formdata = new FormData()
+        const file = new File([uint8], fileName, { type: mime });
+        const formdata = new FormData();
 
-        formdata.append('encoded_image', file)
-        formdata.append('original_width', '' + width)
-        formdata.append('original_height', '' + height)
-        formdata.append('processed_image_dimensions', `${width},${height}`)
+        formdata.append('encoded_image', file);
+        formdata.append('original_width', '' + width);
+        formdata.append('original_height', '' + height);
+        formdata.append('processed_image_dimensions', `${width},${height}`);
 
-        return this.fetch(formdata)
+        return this.fetch(formdata);
     }
 }
 
 export class LensError extends Error {
     constructor (message, code, headers, body) {
-        super(message)
-        this.name = 'LensError'
-        this.code = code
-        this.headers = headers
-        this.body = body
+        super(message);
+        this.name = 'LensError';
+        this.code = code;
+        this.headers = headers;
+        this.body = body;
     }
 }
