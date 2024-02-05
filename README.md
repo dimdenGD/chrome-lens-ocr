@@ -74,6 +74,16 @@ const lens = new Lens({
 });
 ```
 
+## Using in other environments
+You can use this library in environments that don't support Node.js APIs by importing only the core, which doesn't include other "scanBy" utility functions:
+```javascript
+import LensCore from 'chrome-lens-ocr/src/core.js';
+
+const lens = new LensCore();
+lens.scanByData(new Uint8Array([41, 40, 236, 244, 151, 101, 118, 16, 37, 138, 199, 229, 2, 75, 33]), 'myImage.png', 'image/png');
+```
+But in this case, you'll need to handle resizing images to less than 1000x1000 dimensions yourself, as larger images aren't supported by Google Lens.
+
 ## Options
 Options can be empty, or contain the following (default values):
 ```javascript
@@ -81,7 +91,7 @@ Options can be empty, or contain the following (default values):
   chromeVersion: '121.0.6167.140', // Version of Chromium to "use"
   userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', // user agent to use, major Chrome version should match the previous value
   headers: {}, // you can add headers here, they'll override the default ones
-  dispatcher: undefined, // you can use undici dispatcher to proxy requests
+  dispatcher: undefined // you can use undici dispatcher to proxy requests
 }
 ```
 

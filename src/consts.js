@@ -9,7 +9,7 @@ export const SUPPORTED_MIMES = [
     'image/tiff',
     'image/webp',
     'image/heic'
-]
+];
 
 export const MIME_TO_EXT = {
     'image/x-icon': 'ico',
@@ -19,4 +19,4 @@ export const MIME_TO_EXT = {
     'image/tiff': 'tiff',
     'image/webp': 'webp',
     'image/heic': 'heic'
-}
+};
