@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { fileTypeFromBuffer } from 'file-type'
 import { imageDimensionsFromData } from 'image-dimensions'
 import sharp from 'sharp'
-import fetch from 'cross-fetch-ponyfill'
+import { fetch } from 'undici'
 
 import LensCore from './core.js'
 
