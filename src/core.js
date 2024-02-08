@@ -1,6 +1,5 @@
 import { imageDimensionsFromData } from 'image-dimensions';
 import setCookie from 'set-cookie-parser';
-
 import { LENS_ENDPOINT, MIME_TO_EXT, SUPPORTED_MIMES } from './consts.js';
 import { parseCookies, sleep } from './utils.js';
 
@@ -9,7 +8,7 @@ export default class LensCore {
     cookies = {};
     _fetch = globalThis.fetch && globalThis.fetch.bind(globalThis);
 
-    constructor (config = {}, fetch) {
+    constructor(config = {}, fetch) {
         if (typeof config !== 'object') {
             console.warn('Lens constructor expects an object, got', typeof config);
             config = {};
@@ -47,7 +46,7 @@ export default class LensCore {
         this.#parseCookies();
     }
 
-    #parseCookies () {
+    #parseCookies() {
         if (this.#config?.headers?.cookie) {
             if (typeof this.#config?.headers?.cookie === 'string') {
                 // parse cookies from string
@@ -65,7 +64,7 @@ export default class LensCore {
         }
     }
 
-    updateOptions (options) {
+    updateOptions(options) {
         for (const key in options) {
             this.#config[key] = options[key];
         }
@@ -73,7 +72,7 @@ export default class LensCore {
         this.#parseCookies();
     }
 
-    async fetch (formdata, secondTry = false) {
+    async fetch(formdata, secondTry = false) {
         const params = new URLSearchParams();
 
         params.append('s', '' + 4); // SurfaceProtoValue - Surface.CHROMIUM
@@ -157,7 +156,7 @@ export default class LensCore {
         }
     }
 
-    #generateHeaders () {
+    #generateHeaders() {
         return {
             Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
             'Accept-Encoding': 'gzip, deflate, br',
@@ -195,7 +194,7 @@ export default class LensCore {
         };
     }
 
-    #generateCookieHeader (header) {
+    #generateCookieHeader(header) {
         if (Object.keys(this.cookies).length > 0) {
             this.cookies = Object.fromEntries(Object.entries(this.cookies).filter(([name, cookie]) => cookie.expires > Date.now()));
             header.cookie = Object.entries(this.cookies)
@@ -203,7 +202,7 @@ export default class LensCore {
         }
     }
 
-    #setCookies (combinedCookieHeader) {
+    #setCookies(combinedCookieHeader) {
         const splitCookieHeaders = setCookie.splitCookiesString(combinedCookieHeader);
         const cookies = setCookie.parse(splitCookieHeaders);
 
@@ -215,7 +214,7 @@ export default class LensCore {
         }
     }
 
-    getAFData (text) {
+    getAFData(text) {
         const callbacks = text.match(/AF_initDataCallback\((\{.*?\})\)/gms);
         const lensCallback = callbacks.find(c => c.includes('DetectedObject'));
 
@@ -229,17 +228,22 @@ export default class LensCore {
         return eval(`(${match[1]})`);
     }
 
-    getFullText (afData) {
+    getFullText(afData) {
         const data = afData.data;
         const fullTextPart = data[3];
+        const text_segments = fullTextPart[4][0][0];
+        const text_regions = data[2][3][0]
+            .filter(x => x[11].startsWith("text:"))
+            .map(x => x[1]);
 
         return {
             language: fullTextPart[3],
-            text_segments: fullTextPart[4][0][0]
+            text_segments,
+            text_regions
         };
     }
 
-    async scanByData (uint8, fileName, mime) {
+    async scanByData(uint8, fileName, mime) {
         if (!SUPPORTED_MIMES.includes(mime)) {
             throw new Error('File type not supported');
         }
@@ -270,7 +274,7 @@ export default class LensCore {
 }
 
 export class LensError extends Error {
-    constructor (message, code, headers, body) {
+    constructor(message, code, headers, body) {
         super(message);
         this.name = 'LensError';
         this.code = code;
