@@ -52,6 +52,13 @@ export class Segment {
     }
 }
 
+export class LensResult {
+    constructor(language, segments) {
+        this.language = language;
+        this.segments = segments;
+    }
+}
+
 export default class LensCore {
     #config = {};
     cookies = {};
@@ -319,9 +326,6 @@ export default class LensCore {
             segments.push(segment);
         }
 
-        return {
-            language: fullTextPart[3],
-            segments
-        };
+        return new LensResult(fullTextPart[3], segments);
     }
 }
