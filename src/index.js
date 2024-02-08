@@ -9,7 +9,7 @@ import LensCore, { LensError } from './core.js';
 export { LensError };
 
 export default class Lens extends LensCore {
-    constructor (config = {}) {
+    constructor(config = {}) {
         if (typeof config !== 'object') {
             console.warn('Lens constructor expects an object, got', typeof config);
             config = {};
@@ -17,13 +17,13 @@ export default class Lens extends LensCore {
         super(config, fetch);
     }
 
-    async scanByFile (path) {
+    async scanByFile(path) {
         const file = await readFile(path);
 
         return this.scanByBuffer(file, path.split('/').pop());
     }
 
-    async scanByBuffer (buffer, fileName) {
+    async scanByBuffer(buffer, fileName) {
         const fileType = await fileTypeFromBuffer(buffer);
 
         if (!fileType) throw new Error('File type not supported');
@@ -53,7 +53,7 @@ export default class Lens extends LensCore {
         return this.scanByData(buffer, fileName, fileType.mime);
     }
 
-    async scanByURL (url) {
+    async scanByURL(url) {
         const response = await fetch(url);
         const buffer = await response.arrayBuffer();
 
