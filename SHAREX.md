@@ -20,4 +20,4 @@ Except instead of
 ![gif](https://lune.dimden.dev/1bf28abae5b0.gif)
 
 ## Troubleshooting
-If it doesn't copy anything for you, there might be some error happening in `sharex.js` script. You can turn off "Hidden window" in "lens" Action settings and run the hotkey again to see the error.  
+If it takes a long time to show image and at the end doesn't copy anything for you, there might be some error happening in `sharex.js` script. You can turn off "Hidden window" in "lens" Action settings and run the hotkey again to see the error.  

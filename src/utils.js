@@ -1,4 +1,4 @@
-export function parseCookies (cookies) {
+export function parseCookies(cookies) {
     return cookies.split('; ').reduce((prev, current) => {
         const [name, ...value] = current.split('=');
         prev[name] = value.join('=');
@@ -6,6 +6,6 @@ export function parseCookies (cookies) {
     }, {});
 }
 
-export function sleep (ms) {
+export function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }

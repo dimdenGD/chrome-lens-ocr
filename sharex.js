@@ -40,7 +40,7 @@ try {
     fs.writeFileSync(pathToCookies, JSON.stringify(lens.cookies, null, 4));
 
     // write text to clipboard
-    clipboardy.writeSync(text.text_segments.join('\n'));
+    clipboardy.writeSync(text.segments.map(s => s.text).join('\n'));
 } catch (e) {
     console.error('Error occurred:');
     console.error(e);

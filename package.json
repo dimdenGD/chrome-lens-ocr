@@ -1,6 +1,6 @@
 {
   "name": "chrome-lens-ocr",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "Package to use Google Lens OCR for free, via API used in Chrome.",
   "main": "src/index.js",
   "scripts": {
