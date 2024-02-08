@@ -4,9 +4,9 @@ import { imageDimensionsFromData } from 'image-dimensions';
 import sharp from 'sharp';
 import { fetch } from 'undici';
 
-import LensCore, { LensError, Segment, BoundingBox } from './core.js';
+import LensCore, { LensResult, LensError, Segment, BoundingBox } from './core.js';
 
-export { LensError, Segment, BoundingBox };
+export { LensResult, LensError, Segment, BoundingBox };
 
 export default class Lens extends LensCore {
     constructor(config = {}) {

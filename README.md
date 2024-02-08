@@ -24,6 +24,7 @@ All methods above return `LensResult` object (see docs below). In case error hap
 ![Example output](https://lune.dimden.dev/1454b73026ab.png)  
   
 ## API
+All of the classes are exported. `Lens` is the default export, and `LensCore`, `LensResult`, `Segment`, `BoundingBox` and `LensError` are named exports.
 ### class Lens extends LensCore
 #### `constructor(options: Object): Lens`
 Creates a new instance of Lens. Options are optional.
