@@ -12,7 +12,7 @@ npm i chrome-lens-ocr
 import Lens from 'chrome-lens-ocr';
 import { inspect } from 'util';
 
-const lens = new Lens(options);
+const lens = new Lens();
 const log = data => console.log(inspect(data, { depth: null, colors: true }));
 
 lens.scanByFile('shrimple.png').then(log).catch(console.error);
@@ -56,6 +56,17 @@ Internal method to send a request to the API. You can use it to send a custom re
 #### `cookies`
 This property contains object with cookies that are set for the instance. You can use it to save and load cookies to avoid doing the consent process every time.
 
+### Options object
+Options can be empty, or contain the following (default values):
+```javascript
+{
+  chromeVersion: '121.0.6167.140', // Version of Chromium to "use"
+  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', // user agent to use, major Chrome version should match the previous value
+  headers: {}, // you can add headers here, they'll override the default ones
+  dispatcher: undefined // you can use undici dispatcher to proxy requests
+}
+```
+
 ### class LensResult
 Instance of this class is is returned by all scan methods. It contains the following properties:
 ```javascript
@@ -93,7 +104,7 @@ Instance of this class is contained in `Segment`'s `boundingBox` property. It co
 }
 ```
 
-### class LensError
+### class LensError extends Error
 Instance of this class is thrown when an error happens during the process. It contains the following properties:
 ```javascript
 {
@@ -102,17 +113,6 @@ Instance of this class is thrown when an error happens during the process. It co
   code: String, // error code
   headers: HeadersList, // headers of the response
   body: String, // body of the response
-}
-```
-
-### Options object
-Options can be empty, or contain the following (default values):
-```javascript
-{
-  chromeVersion: '121.0.6167.140', // Version of Chromium to "use"
-  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36', // user agent to use, major Chrome version should match the previous value
-  headers: {}, // you can add headers here, they'll override the default ones
-  dispatcher: undefined // you can use undici dispatcher to proxy requests
 }
 ```
 
