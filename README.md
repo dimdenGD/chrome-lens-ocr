@@ -41,8 +41,8 @@ Scans an image from a buffer.
 ### class LensCore
 This is the core class, which is extended by `Lens`. You can use it if you want to use the library in environments that don't support Node.js APIs, as it doesn't include `scanByFile`, `scanByURL` and `scanByBuffer` methods. Keep in mind that `Lens` class extends `LensCore`, so all methods and properties of `LensCore` are available in `Lens`.
   
-#### `constructor(options: Object): LensCore`
-Creates a new instance of LensCore. Options are optional.
+#### `constructor(options: Object, fetch): LensCore`
+Creates a new instance of LensCore. Options are optional. You can optionally pass `fetch` function if you don't have it by default in your global scope.  
 
 #### `scanByData(data: Uint8Array, mime: String, originalDimensions: Array): Promise<LensResult>`
 Scans an image from a Uint8Array. `originalDimensions` is optional array of `[width, height]` format, and is only needed if you want to get pixel coordinates of the text. You should only use this method if you're using the library in environments that don't support Node.js APIs, because it doesn't automatically resize images to less than 1000x1000 dimensions, like methods in `Lens` do.
