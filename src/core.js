@@ -340,12 +340,8 @@ export default class LensCore {
                     // instead of [centerX, centerY, width, height] it's [topLeftY, topLeftX, width, height]
                     // so we need to convert it
                     let region = part[1];
-                    let x = region[1];
-                    let y = region[0];
-                    let width = region[2];
-                    let height = region[3];
-                    let centerX = x + (width / 2);
-                    let centerY = y + (height / 2);
+                    let [y, x, width, height] = region;
+                    let centerX = x + (width / 2), centerY = y + (height / 2);
                     region = [centerX, centerY, width, height];
 
                     text_segments.push(text);
