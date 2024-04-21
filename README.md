@@ -154,7 +154,7 @@ const lens = new Lens({
 ```
 
 ## Using in other environments
-You can use this library in environments that don't support Node.js APIs by importing only the core, which doesn't include `scanByFile`, `scanByURL` and `scanByBuffer` methods. Instead, it has `scanByData` method, which accepts a `Uint8Array`, mime type and optionally original image dimensions. Here's an example:
+You can use this library in environments that don't support Node.js APIs by importing only the core, which doesn't include `scanByFile`, `scanByURL` and `scanByBuffer` methods. Instead, it has `scanByData` method, which accepts a `Uint8Array`, mime type and original image dimensions. Here's an example:
 ```javascript
 import LensCore from 'chrome-lens-ocr/src/core.js';
 
