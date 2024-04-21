@@ -6,18 +6,18 @@ import { parseCookies, sleep } from './utils.js';
 export class BoundingBox {
     #imageDimensions;
     constructor(box, imageDimensions) {
+        if(!box) throw new Error('Bounding box not set');
+        if(!imageDimensions || imageDimensions.length !== 2) throw new Error('Image dimensions not set');
+        
         this.#imageDimensions = imageDimensions;
 
         this.centerPerX = box[0];
         this.centerPerY = box[1];
         this.perWidth = box[2];
         this.perHeight = box[3];
-
-        if(imageDimensions) this.pixelCoords = this.#toPixelCoords();
+        this.pixelCoords = this.#toPixelCoords();
     }
     #toPixelCoords() {
-        if(!this.#imageDimensions) throw new Error('Image dimensions not set');
-
         const [imgWidth, imgHeight] = this.#imageDimensions;
 
         const width = this.perWidth * imgWidth;
@@ -46,9 +46,9 @@ export class LensError extends Error {
 }
 
 export class Segment {
-    constructor(text, boundingBox, imageDimensions) {
+    constructor(text, boundingBox, topLeftMode, imageDimensions) {
         this.text = text;
-        this.boundingBox = new BoundingBox(boundingBox, imageDimensions);
+        this.boundingBox = new BoundingBox(boundingBox, topLeftMode, imageDimensions);
     }
 }
 
@@ -71,17 +71,18 @@ export default class LensCore {
 
         if (fetch) this._fetch = fetch;
 
-        const chromeVersion = config?.chromeVersion ?? '121.0.6167.140';
+        const chromeVersion = config?.chromeVersion ?? '124.0.6367.60';
         const majorChromeVersion = config?.chromeVersion?.split('.')[0] ?? chromeVersion.split('.')[0];
 
         this.#config = {
             chromeVersion,
             majorChromeVersion,
             sbisrc: `Google Chrome ${chromeVersion} (Official) Windows`,
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
             endpoint: LENS_ENDPOINT,
             viewport: [1920, 1080],
             headers: {},
+            fetchOptions: {},
             ...config
         };
 
@@ -132,9 +133,8 @@ export default class LensCore {
             method: 'POST',
             headers,
             body: formdata,
-            dispatcher: this.#config.dispatcher,
-            agent: this.#config.agent,
-            redirect: 'manual'
+            redirect: 'manual',
+            ...this.#config.fetchOptions
         });
 
         const text = await response.text();
@@ -189,7 +189,7 @@ export default class LensCore {
             const afData = LensCore.getAFData(text);
             return LensCore.parseResult(afData, originalDimensions);
         } catch (e) {
-            throw new LensError(`Could not parse response: ${e}`, response.status, response.headers, text);
+            throw new LensError(`Could not parse response: ${e.stack}`, response.status, response.headers, text);
         }
     }
 
@@ -197,6 +197,7 @@ export default class LensCore {
         if (!SUPPORTED_MIMES.includes(mime)) {
             throw new Error('File type not supported');
         }
+        if(!originalDimensions) throw new Error('Original dimensions not set');
 
         let fileName = `image.${MIME_TO_EXT[mime]}`;
 
@@ -246,15 +247,15 @@ export default class LensCore {
             'Sec-Fetch-User': '?1',
             'Upgrade-Insecure-Requests': '1',
             'User-Agent': this.#config.userAgent,
-            'X-Client-Data': 'CIW2yQEIorbJAQipncoBCIH+ygEIlqHLAQjtocsBCPWYzQEIhaDNAQjd7M0BCMruzQEIg/DNAQjW8c0BCIDyzQEIz/TNAQiQ9c0BCLb3zQEYp+rNARib+M0BGMr4zQE='
+            'X-Client-Data': 'CIW2yQEIorbJAQipncoBCIH+ygEIlaHLAQj1mM0BCIWgzQEI3ezNAQji+s0BCOmFzgEIponOAQj1ic4BCIeLzgEY1d3NARjS/s0BGNiGzgE='
             /*
-                X-Client-Data: CIW2yQEIorbJAQipncoBCIH+ygEIlqHLAQjtocsBCPWYzQEIhaDNAQjd7M0BCMruzQEIg/DNAQjW8c0BCIDyzQEIz/TNAQiQ9c0BCLb3zQEYp+rNARib+M0BGMr4zQE=
+                X-Client-Data: CIW2yQEIorbJAQipncoBCIH+ygEIlaHLAQj1mM0BCIWgzQEI3ezNAQji+s0BCOmFzgEIponOAQj1ic4BCIeLzgEY1d3NARjS/s0BGNiGzgE=
                 Decoded:
                 message ClientVariations {
                     // Active client experiment variation IDs.
-                    repeated int32 variation_id = [3300101, 3300130, 3313321, 3325697, 3330198, 3330285, 3361909, 3362821, 3372637, 3372874, 3373059, 3373270, 3373312, 3373647, 3373712, 3374006];
+                    repeated int32 variation_id = [3300101, 3300130, 3313321, 3325697, 3330197, 3361909, 3362821, 3372637, 3374434, 3375849, 3376294, 3376373, 3376519];
                     // Active client experiment variation IDs that trigger server-side behavior.
-                    repeated int32 trigger_variation_id = [3372327, 3374107, 3374154];
+                    repeated int32 trigger_variation_id = [3370709, 3374930, 3375960];
                 }
             */
         };
@@ -315,10 +316,43 @@ export default class LensCore {
     static parseResult(afData, imageDimensions) {
         const data = afData.data;
         const fullTextPart = data[3];
-        const text_segments = fullTextPart[4][0][0];
-        const text_regions = data[2][3][0]
-            .filter(x => x[11].startsWith("text:"))
-            .map(x => x[1]);
+        let text_segments = [], text_regions = [];
+
+        try {
+            // method 1, get text segments and regions directly
+            text_segments = fullTextPart[4][0][0];
+            text_regions = data[2][3][0]
+                .filter(x => x[11].startsWith("text:"))
+                .map(x => x[1]);
+        } catch (e) {
+            // method 2
+            // sometimes the text segments are not directly available
+            // try to get them from text parts
+            let big_parts = fullTextPart[2][0];
+            for(let big_part of big_parts) {
+                let parts = big_part[0];
+                for(let part of parts) {
+                    let text = part[0].reduce((a, b) => {
+                        return a + b[0] + (b[3] ?? '');
+                    }, '');
+                    
+                    // region data is different format from method 1
+                    // instead of [centerX, centerY, width, height] it's [topLeftY, topLeftX, width, height]
+                    // so we need to convert it
+                    let region = part[1];
+                    let x = region[1];
+                    let y = region[0];
+                    let width = region[2];
+                    let height = region[3];
+                    let centerX = x + (width / 2);
+                    let centerY = y + (height / 2);
+                    region = [centerX, centerY, width, height];
+
+                    text_segments.push(text);
+                    text_regions.push(region);
+                }
+            }
+        }
 
         const segments = [];
         for (const i in text_segments) {

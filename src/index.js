@@ -28,7 +28,7 @@ export default class Lens extends LensCore {
 
         if (!fileType) throw new Error('File type not supported');
 
-        const uint8Array = Uint8Array.from(buffer);
+        let uint8Array = Uint8Array.from(buffer);
 
         const dimensions = imageDimensionsFromData(uint8Array);
         if (!dimensions) {
@@ -37,11 +37,12 @@ export default class Lens extends LensCore {
 
         // Google Lens does not accept images larger than 1000x1000
         if (dimensions.width > 1000 || dimensions.height > 1000) {
-            buffer = await sharp(buffer)
+            uint8Array = Uint8Array.from(await sharp(buffer)
                 .resize(1000, 1000, { fit: 'inside' })
                 .withMetadata()
                 .jpeg({ quality: 90, progressive: true })
-                .toBuffer();
+                .toBuffer()
+            );
         }
 
         return this.scanByData(uint8Array, fileType.mime, [dimensions.width, dimensions.height]);

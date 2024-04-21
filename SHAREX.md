@@ -21,3 +21,6 @@ Except instead of
 
 ## Troubleshooting
 If it takes a long time to show image and at the end doesn't copy anything for you, there might be some error happening in `sharex.js` script. You can turn off "Hidden window" in "lens" Action settings and run the hotkey again to see the error.  
+
+## Updating
+If there was an update to this repo, you can just download the new version and replace the old one. You can also run `git pull` in the folder if you have git installed.
