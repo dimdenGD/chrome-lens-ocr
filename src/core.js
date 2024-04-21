@@ -46,9 +46,9 @@ export class LensError extends Error {
 }
 
 export class Segment {
-    constructor(text, boundingBox, topLeftMode, imageDimensions) {
+    constructor(text, boundingBox, imageDimensions) {
         this.text = text;
-        this.boundingBox = new BoundingBox(boundingBox, topLeftMode, imageDimensions);
+        this.boundingBox = new BoundingBox(boundingBox, imageDimensions);
     }
 }
 
