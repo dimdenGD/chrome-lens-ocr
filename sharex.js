@@ -3,6 +3,7 @@ import Lens from './src/index.js';
 import { sleep } from './src/utils.js';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 try {
     // get file path from command line
@@ -10,15 +11,9 @@ try {
     const file = args[0];
 
     // get path to cookies file (should be in the same directory as this script)
-    let moduleUrl = import.meta.url;
-    if (moduleUrl.startsWith('file://')) {
-        moduleUrl = moduleUrl.slice(7);
-    }
+    const moduleUrl = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(moduleUrl);
-    let pathToCookies = path.join(__dirname, 'cookies.json');
-    if (pathToCookies.match(/^\\[A-Z]:\\/)) {
-        pathToCookies = pathToCookies.slice(1);
-    }
+    const pathToCookies = path.join(__dirname, 'cookies.json');
 
     // read cookies from file
     let cookies;
