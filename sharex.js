@@ -13,10 +13,7 @@ try {
     // get path to cookies file (should be in the same directory as this script)
     const moduleUrl = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(moduleUrl);
-    let pathToCookies = path.join(__dirname, 'cookies.json');
-    if (pathToCookies.match(/^\\[A-Z]:\\/)) {
-        pathToCookies = pathToCookies.slice(1);
-    }
+    const pathToCookies = path.join(__dirname, 'cookies.json');
 
     // read cookies from file
     let cookies;
