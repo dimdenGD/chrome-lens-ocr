@@ -3,6 +3,9 @@
   "version": "3.0.0",
   "description": "Package to use Google Lens OCR for free, via API used in Chrome.",
   "main": "src/index.js",
+  "files": [
+    "./src/*"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
