@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import clipboardy from 'clipboardy';
 import Lens from './src/index.js';
 import { sleep } from './src/utils.js';

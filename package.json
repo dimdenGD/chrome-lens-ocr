@@ -4,7 +4,11 @@
   "description": "Package to use Google Lens OCR for free, via API used in Chrome.",
   "main": "src/index.js",
   "scripts": {
+    "start": "node sharex.js",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "chrome-lens-ocr": "./sharex.js"
   },
   "type": "module",
   "repository": {
@@ -29,11 +33,13 @@
   },
   "homepage": "https://github.com/dimdenGD/chrome-lens-ocr#readme",
   "dependencies": {
-    "clipboardy": "^4.0.0",
     "file-type": "^19.0.0",
     "image-dimensions": "^2.3.0",
     "set-cookie-parser": "^2.6.0",
     "sharp": "^0.33.2",
     "undici": "^5.28.3"
+  },
+  "devDependencies": {
+    "clipboardy": "^4.0.0"
   }
 }
