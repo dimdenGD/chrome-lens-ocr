@@ -1,6 +1,6 @@
 import { imageDimensionsFromData } from 'image-dimensions';
 import setCookie from 'set-cookie-parser';
-import { LENS_ENDPOINT, MIME_TO_EXT, SUPPORTED_MIMES } from './consts.js';
+import { LENS_API_ENDPOINT, LENS_ENDPOINT, MIME_TO_EXT, SUPPORTED_MIMES } from './consts.js';
 import { parseCookies, sleep } from './utils.js';
 
 export class BoundingBox {
@@ -8,7 +8,7 @@ export class BoundingBox {
     constructor(box, imageDimensions) {
         if(!box) throw new Error('Bounding box not set');
         if(!imageDimensions || imageDimensions.length !== 2) throw new Error('Image dimensions not set');
-        
+
         this.#imageDimensions = imageDimensions;
 
         this.centerPerX = box[0];
@@ -79,7 +79,6 @@ export default class LensCore {
             majorChromeVersion,
             sbisrc: `Google Chrome ${chromeVersion} (Official) Windows`,
             userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-            endpoint: LENS_ENDPOINT,
             viewport: [1920, 1080],
             headers: {},
             fetchOptions: {},
@@ -110,8 +109,9 @@ export default class LensCore {
         this.#parseCookies();
     }
 
-    async fetch(formdata, originalDimensions, secondTry = false) {
-        const params = new URLSearchParams();
+    async fetch(originalDimensions = [0, 0], secondTry = false) {
+        const url = new URL(this.#config.endpoint)
+        const params = url.searchParams
 
         params.append('s', '' + 4); // SurfaceProtoValue - Surface.CHROMIUM
         params.append('re', 'df'); // RenderingEnvironment - DesktopWebFullscreen
@@ -120,7 +120,6 @@ export default class LensCore {
         params.append('vph', this.#config.viewport[1]); // viewport height
         params.append('ep', 'subb'); // EntryPoint
 
-        const url = `${this.#config.endpoint}?${params.toString()}`;
         const headers = this.#generateHeaders();
 
         for (const key in this.#config.headers) {
@@ -129,10 +128,8 @@ export default class LensCore {
 
         this.#generateCookieHeader(headers);
 
-        const response = await this._fetch(url, {
-            method: 'POST',
+        const response = await this._fetch(String(url), {
             headers,
-            body: formdata,
             redirect: 'manual',
             ...this.#config.fetchOptions
         });
@@ -177,7 +174,7 @@ export default class LensCore {
                 // consent was saved, save new cookies and retry the request
                 this.#setCookies(saveConsentRequest.headers.get('set-cookie'));
                 await sleep(500);
-                return this.fetch(formdata, originalDimensions, true);
+                return this.fetch(originalDimensions, true);
             }
         }
 
@@ -191,6 +188,21 @@ export default class LensCore {
         } catch (e) {
             throw new LensError(`Could not parse response: ${e.stack}`, response.status, response.headers, text);
         }
+    }
+
+    async scanByURL(url, dimensions = [0, 0]) {
+        const endpoint = new URL(LENS_API_ENDPOINT)
+
+        endpoint.searchParams.set('url', String(url))
+
+        this.updateOptions({
+            endpoint: String(endpoint),
+            fetchOptions: {
+                method: 'GET',
+            }
+        })
+
+        return this.fetch(dimensions)
     }
 
     async scanByData(uint8, mime, originalDimensions) {
@@ -220,7 +232,15 @@ export default class LensCore {
         formdata.append('original_height', '' + height);
         formdata.append('processed_image_dimensions', `${width},${height}`);
 
-        return this.fetch(formdata, originalDimensions);
+        this.updateOptions({
+            endpoint: LENS_ENDPOINT,
+            fetchOptions: {
+                method: 'POST',
+                body: formdata,
+            }
+        })
+
+        return this.fetch(originalDimensions);
     }
 
     #generateHeaders() {
@@ -335,7 +355,7 @@ export default class LensCore {
                     let text = part[0].reduce((a, b) => {
                         return a + b[0] + (b[3] ?? '');
                     }, '');
-                    
+
                     // region data is different format from method 1
                     // instead of [centerX, centerY, width, height] it's [topLeftY, topLeftX, width, height]
                     // so we need to convert it
