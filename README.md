@@ -16,13 +16,15 @@ const lens = new Lens();
 const log = data => console.log(inspect(data, { depth: null, colors: true }));
 
 lens.scanByFile('shrimple.png').then(log).catch(console.error);
-lens.scanByURL('https://lune.dimden.dev/7949f833fa42.png').then(log).catch(console.error); // this will fetch the image and then scan it
 lens.scanByBuffer(Buffer.from('...')).then(log).catch(console.error);
-```  
-All methods above return `LensResult` object (see docs below). In case error happened during the process, `LensError` will be thrown.  
-  
-![Example output](https://lune.dimden.dev/1454b73026ab.png)  
-  
+
+// use image url to scan quicker, but pixel coordinates will be 0
+lens.scanByURL('https://lune.dimden.dev/7949f833fa42.png').then(log).catch(console.error);
+```
+All methods above return `LensResult` object (see docs below). In case error happened during the process, `LensError` will be thrown.
+
+![Example output](https://lune.dimden.dev/1454b73026ab.png)
+
 ## API
 All of the classes are exported. `Lens` is the default export, and `LensCore`, `LensResult`, `Segment`, `BoundingBox` and `LensError` are named exports.
 ### class Lens extends LensCore
@@ -32,17 +34,17 @@ Creates a new instance of Lens. `options` is optional.
 #### `scanByFile(path: String): Promise<LensResult>`
 Scans an image from a file.
 
-#### `scanByURL(url: String): Promise<LensResult>`
-Downloads an image from a URL and then scans it.
-
 #### `scanByBuffer(buffer: Buffer): Promise<LensResult>`
 Scans an image from a buffer.
 
 ### class LensCore
-This is the core class, which is extended by `Lens`. You can use it if you want to use the library in environments that don't support Node.js APIs, as it doesn't include `scanByFile`, `scanByURL` and `scanByBuffer` methods. Keep in mind that `Lens` class extends `LensCore`, so all methods and properties of `LensCore` are available in `Lens`.
-  
+This is the core class, which is extended by `Lens`. You can use it if you want to use the library in environments that don't support Node.js APIs, as it doesn't include `scanByFile` and `scanByBuffer` methods. Keep in mind that `Lens` class extends `LensCore`, so all methods and properties of `LensCore` are available in `Lens`.
+
 #### `constructor(options?: Object, fetch?: Function): LensCore`
 Creates a new instance of LensCore. `options` is optional. `fetch` is function that will be used to send requests, by default it's `fetch` from global scope.
+
+#### `scanByURL(url: String, dimensions?: [Number, Number] = [0, 0]): Promise<LensResult>`
+Scans an image from a remote URL, supports large image resolution. You may provide an optional image dimensions array, or else text segment coordinates (`result.segments[].pixelCoords`) from this method will always return 0.
 
 #### `scanByData(data: Uint8Array, mime: String, originalDimensions: Array): Promise<LensResult>`
 Scans an image from a Uint8Array. `originalDimensions` is array of `[width, height]` format. You must provide width and height of image before it was resized to get accurate pixel coordinates. You should only use this method if you're using the library in environments that don't support Node.js APIs, because it doesn't automatically resize images to less than 1000x1000 dimensions, like methods in `Lens` do.
@@ -50,7 +52,7 @@ Scans an image from a Uint8Array. `originalDimensions` is array of `[width, heig
 #### `updateOptions(options: Object): void`
 Updates the options for the instance.
 
-#### `fetch(formdata: FormData, originalDimensions: Array): Promise<LensResult>`
+#### `fetch(options?: RequestInit & { endpoint: String } = {}, originalDimensions: Array): Promise<LensResult>`
 Internal method to send a request to the API. You can use it to send a custom request, but you'll have to handle the formdata and dimensions yourself. Original dimensions (`[width, height]`) are used to calculate pixel coordinates of the text. You should supply dimensions before any resizing (hence 'original') if you want to get correct coordinates for original image.
 
 #### `cookies`
@@ -154,7 +156,7 @@ const lens = new Lens({
 ```
 
 ## Using in other environments
-You can use this library in environments that don't support Node.js APIs by importing only the core, which doesn't include `scanByFile`, `scanByURL` and `scanByBuffer` methods. Instead, it has `scanByData` method, which accepts a `Uint8Array`, mime type and original image dimensions. Here's an example:
+You can use this library in environments that don't support Node.js APIs by importing only the core, which doesn't include `scanByFile` and `scanByBuffer` methods. Instead, it has `scanByData` method, which accepts a `Uint8Array`, mime type and original image dimensions. Here's an example:
 ```javascript
 import LensCore from 'chrome-lens-ocr/src/core.js';
 
@@ -162,7 +164,7 @@ const lens = new LensCore();
 lens.scanByData(new Uint8Array([41, 40, 236, 244, 151, 101, 118, 16, 37, 138, 199, 229, 2, 75, 33]) 'image/png', [1280, 720]);
 ```
 But in this case, you'll need to handle resizing images to less than 1000x1000 dimensions yourself, as larger images aren't supported by Google Lens.
-  
+
 ## Additional information
 In some of the EU countries, using any Google services requires cookie consent. This library handles it automatically, but it's pretty slow on first scan of the instance. So if you make a lot of new instances or always need it to be fast on first launch, you need to save cookies somewhere to avoid this. There's an example of how to do it in [sharex.js](https://github.com/dimdenGD/chrome-lens-ocr/blob/main/sharex.js).
 

@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { access, constants, readFile } from 'node:fs/promises';
 import { fileTypeFromBuffer } from 'file-type';
 import { imageDimensionsFromData } from 'image-dimensions';
 import sharp from 'sharp';
@@ -18,6 +18,20 @@ export default class Lens extends LensCore {
     }
 
     async scanByFile(path) {
+        if (typeof path !== 'string') {
+            throw new TypeError(`scanByFile expects a string, got ${typeof path}`)
+        }
+
+        try {
+            await access(path, constants.R_OK)
+        } catch (error) {
+            switch (error.code) {
+                case 'EACCES': throw new Error(`Read permission denied: ${path}`)
+                case 'ENOENT': throw new Error(`File not found: ${path}`)
+                case 'EISDIR': throw new Error(`Expected file, Found directory: ${path}`)
+            }
+        }
+
         const file = await readFile(path);
 
         return this.scanByBuffer(file);
@@ -46,12 +60,5 @@ export default class Lens extends LensCore {
         }
 
         return this.scanByData(uint8Array, fileType.mime, [dimensions.width, dimensions.height]);
-    }
-
-    async scanByURL(url) {
-        const response = await fetch(url);
-        const buffer = await response.arrayBuffer();
-
-        return this.scanByBuffer(Buffer.from(buffer));
     }
 }
