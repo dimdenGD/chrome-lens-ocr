@@ -7,9 +7,7 @@
     "start": "node sharex.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "bin": {
-    "chrome-lens-ocr": "./sharex.js"
-  },
+  "bin": "./sharex.js",
   "type": "module",
   "repository": {
     "type": "git",
