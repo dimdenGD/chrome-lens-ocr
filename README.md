@@ -52,7 +52,7 @@ Scans an image from a Uint8Array. `originalDimensions` is array of `[width, heig
 #### `updateOptions(options: Object): void`
 Updates the options for the instance.
 
-#### `fetch(formdata: FormData, originalDimensions: Array): Promise<LensResult>`
+#### `fetch(options?: RequestInit & { endpoint: String } = {}, originalDimensions: Array): Promise<LensResult>`
 Internal method to send a request to the API. You can use it to send a custom request, but you'll have to handle the formdata and dimensions yourself. Original dimensions (`[width, height]`) are used to calculate pixel coordinates of the text. You should supply dimensions before any resizing (hence 'original') if you want to get correct coordinates for original image.
 
 #### `cookies`

@@ -79,6 +79,7 @@ export default class LensCore {
             majorChromeVersion,
             sbisrc: `Google Chrome ${chromeVersion} (Official) Windows`,
             userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            endpoint: LENS_ENDPOINT,
             viewport: [1920, 1080],
             headers: {},
             fetchOptions: {},
@@ -109,8 +110,8 @@ export default class LensCore {
         this.#parseCookies();
     }
 
-    async fetch(originalDimensions = [0, 0], secondTry = false) {
-        const url = new URL(this.#config.endpoint)
+    async fetch(options = {}, originalDimensions = [0, 0], secondTry = false) {
+        const url = new URL(options.endpoint || this.#config.endpoint)
         const params = url.searchParams
 
         params.append('s', '' + 4); // SurfaceProtoValue - Surface.CHROMIUM
@@ -131,6 +132,7 @@ export default class LensCore {
         const response = await this._fetch(String(url), {
             headers,
             redirect: 'manual',
+            ...options,
             ...this.#config.fetchOptions
         });
 
@@ -174,7 +176,7 @@ export default class LensCore {
                 // consent was saved, save new cookies and retry the request
                 this.#setCookies(saveConsentRequest.headers.get('set-cookie'));
                 await sleep(500);
-                return this.fetch(originalDimensions, true);
+                return this.fetch({}, originalDimensions, true);
             }
         }
 
@@ -195,14 +197,12 @@ export default class LensCore {
 
         endpoint.searchParams.set('url', String(url))
 
-        this.updateOptions({
+        const options = {
             endpoint: String(endpoint),
-            fetchOptions: {
-                method: 'GET',
-            }
-        })
+            method: 'GET',
+        }
 
-        return this.fetch(dimensions)
+        return this.fetch(options, dimensions)
     }
 
     async scanByData(uint8, mime, originalDimensions) {
@@ -232,15 +232,13 @@ export default class LensCore {
         formdata.append('original_height', '' + height);
         formdata.append('processed_image_dimensions', `${width},${height}`);
 
-        this.updateOptions({
+        const options = {
             endpoint: LENS_ENDPOINT,
-            fetchOptions: {
-                method: 'POST',
-                body: formdata,
-            }
-        })
+            method: 'POST',
+            body: formdata,
+        }
 
-        return this.fetch(originalDimensions);
+        return this.fetch(options, originalDimensions);
     }
 
     #generateHeaders() {
