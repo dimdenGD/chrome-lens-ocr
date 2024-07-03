@@ -170,3 +170,19 @@ In some of the EU countries, using any Google services requires cookie consent. 
 
 ## Custom Sharex OCR
 It's possible to use this package with Sharex to OCR images using Google Lens API, instead of bad default OCR in Sharex. Please refer to [SHAREX.md](https://github.com/dimdenGD/chrome-lens-ocr/blob/main/SHAREX.md) for instructions.
+
+## CLI Usage
+You may install this package globally by adding -g on install:
+```bash
+npm install -g chrome-lens-ocr
+```
+Doing this will allow you to use the OCR from a terminal.
+```
+Usage: chrome-lens-ocr [-d] ./path/to/image.png
+       -d   Do not copy text to clipboard
+```
+Example:
+```bash
+chrome-lens-ocr ./shrimple.png
+chrome-lens-ocr -d ./shrimple.png
+```
