@@ -5,46 +5,43 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import clipboardy from 'clipboardy';
 import Lens from './src/index.js';
-// import { sleep } from './src/utils.js';
+import { sleep } from './src/utils.js';
 
-function usage() {
+function help() {
+    console.log('Scan text from image using Google Lens and copy to clipboard.')
     console.log('')
-    console.log('Usage: chrome-lens-ocr [-d] ./path/to/image.png')
-    console.log('       -d   Do not copy text to clipboard')
+    console.log('USAGE:')
+    console.log('    chrome-lens-ocr [-d] [-x] ./path/to/image.png')
+    console.log('    chrome-lens-ocr [-d] [-x] https://domain.tld/image.png')
+    console.log('    chrome-lens-ocr --help')
+    console.log('ARGS:')
+    console.log('    -d         Do not copy text to clipboard')
+    console.log('    -h, --help Show this message')
+    console.log('    -x         Use only for ShareX command, will always copy text')
     return
 }
 
+const args = process.argv.slice(2);
+let image, shouldCopy = true, isSharex = false;
+
 async function main() {
-    // get file path from command line
-    const args = process.argv.slice(2);
-
-    if (!args.length) {
-        console.log('Get image texts using Google Lens and copy to clipboard.')
-        usage();
-        return;
+    if (args.includes('-x')) {
+        args.splice(args.indexOf('-x'), 1)
+        isSharex = true
     }
 
-    const [arg0, arg1] = args;
-    let file, copy = true;
-
-    // if 1st arg is the switch, 2nd arg must exists
-    if (arg0 === '-d') {
-        if (arg1) {
-            file = arg1
-            copy = false
-        } else {
-            console.error('Image file path is not specified')
-            usage()
-            return
-        }
-    } else {
-        file = arg0
+    if (args.includes('-d')) {
+        args.splice(args.indexOf('-d'), 1)
+        shouldCopy = false
     }
 
-    // if 2nd arg is the switch, 1st arg must be the path
-    if (arg1 === '-d') {
-        copy = false
+    // check empty arguments at last
+    if (!args.length || args.includes('-h') || args.includes('--help')) {
+        return help()
     }
+
+    // hope the last argument is the image
+    image = args[0]
 
     // get path to cookies file (should be in the same directory as this script)
     const moduleUrl = fileURLToPath(import.meta.url);
@@ -70,9 +67,15 @@ async function main() {
     // create lens instance, with cookie if exists
     const lensOptions = cookie ? { headers: { cookie } } : {}
     const lens = new Lens(lensOptions);
+    let text
 
-    // scan file
-    const text = await lens.scanByFile(file);
+    // remove Windows drive prefix because false positive
+    if (URL.canParse(image.replace(/^\w{1}:/, ''))) {
+        text = await lens.scanByURL(image)
+    } else {
+        text = await lens.scanByFile(image)
+    }
+
     const result = text.segments.map(s => s.text).join('\n')
 
     // write cookies to file
@@ -82,8 +85,10 @@ async function main() {
         { encoding: 'utf8' }
     );
 
-    // write text to clipboard
-    if (copy) clipboardy.writeSync(result);
+    // write text to clipboard, always copy if using sharex
+    if (shouldCopy || isSharex) {
+        clipboardy.writeSync(result);
+    }
 
     console.log(result)
 }
@@ -93,5 +98,6 @@ try {
 } catch (e) {
     console.error('Error occurred:');
     console.error(e);
-    // await sleep(30000);
+
+    if (isSharex) await sleep(30000);
 }
