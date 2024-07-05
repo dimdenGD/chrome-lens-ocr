@@ -185,4 +185,5 @@ Example:
 ```bash
 chrome-lens-ocr ./shrimple.png
 chrome-lens-ocr -d ./shrimple.png
+chrome-lens-ocr -d https://lune.dimden.dev/7949f833fa42.png
 ```
