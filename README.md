@@ -166,7 +166,7 @@ lens.scanByData(new Uint8Array([41, 40, 236, 244, 151, 101, 118, 16, 37, 138, 19
 But in this case, you'll need to handle resizing images to less than 1000x1000 dimensions yourself, as larger images aren't supported by Google Lens.
 
 ## Additional information
-In some of the EU countries, using any Google services requires cookie consent. This library handles it automatically, but it's pretty slow on first scan of the instance. So if you make a lot of new instances or always need it to be fast on first launch, you need to save cookies somewhere to avoid this. There's an example of how to do it in [sharex.js](https://github.com/dimdenGD/chrome-lens-ocr/blob/main/sharex.js).
+In some of the EU countries, using any Google services requires cookie consent. This library handles it automatically, but it's pretty slow on first scan of the instance. So if you make a lot of new instances or always need it to be fast on first launch, you need to save cookies somewhere to avoid this. There's an example of how to do it in [cli.js](https://github.com/dimdenGD/chrome-lens-ocr/blob/main/cli.js).
 
 ## Custom Sharex OCR
 It's possible to use this package with Sharex to OCR images using Google Lens API, instead of bad default OCR in Sharex. Please refer to [SHAREX.md](https://github.com/dimdenGD/chrome-lens-ocr/blob/main/SHAREX.md) for instructions.
