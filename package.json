@@ -10,7 +10,7 @@
     "start": "node sharex.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "bin": "./sharex.js",
+  "bin": "./cli.js",
   "type": "module",
   "repository": {
     "type": "git",
