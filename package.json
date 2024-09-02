@@ -3,6 +3,7 @@
   "version": "4.0.1",
   "description": "Package to use Google Lens OCR for free, via API used in Chrome.",
   "main": "src/index.js",
+  "types": "src/types.d.ts",
   "files": [
     "./src/*"
   ],
