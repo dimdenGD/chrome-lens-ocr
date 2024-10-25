@@ -9,12 +9,18 @@ import LensCore, { LensResult, LensError, Segment, BoundingBox } from './core.js
 export { LensResult, LensError, Segment, BoundingBox };
 
 export default class Lens extends LensCore {
-    constructor(config = {}) {
+    constructor(config = {}, _fetch) {
         if (typeof config !== 'object') {
             console.warn('Lens constructor expects an object, got', typeof config);
             config = {};
         }
-        super(config, fetch);
+
+        let fetchFn = _fetch;
+        if (!fetchFn) {
+            fetchFn = fetch;
+        }
+
+        super(config, fetchFn);
     }
 
     async scanByFile(path) {
