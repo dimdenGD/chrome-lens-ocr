@@ -1,6 +1,6 @@
 import { imageDimensionsFromData } from 'image-dimensions';
 import setCookie from 'set-cookie-parser';
-import { LENS_API_ENDPOINT, LENS_ENDPOINT, MIME_TO_EXT, SUPPORTED_MIMES } from './consts.js';
+import { LENS_API_ENDPOINT, LENS_ENDPOINT, MIME_TO_EXT, EXT_TO_MIME, SUPPORTED_MIMES } from './consts.js';
 import { parseCookies, sleep } from './utils.js';
 
 export class BoundingBox {
@@ -71,14 +71,14 @@ export default class LensCore {
 
         if (fetch) this._fetch = fetch;
 
-        const chromeVersion = config?.chromeVersion ?? '124.0.6367.60';
+        const chromeVersion = config?.chromeVersion ?? '131.0.6778.205';
         const majorChromeVersion = config?.chromeVersion?.split('.')[0] ?? chromeVersion.split('.')[0];
 
         this.#config = {
             chromeVersion,
             majorChromeVersion,
             sbisrc: `Google Chrome ${chromeVersion} (Official) Windows`,
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
             endpoint: LENS_ENDPOINT,
             viewport: [1920, 1080],
             headers: {},
@@ -114,12 +114,13 @@ export default class LensCore {
         const url = new URL(options.endpoint || this.#config.endpoint)
         const params = url.searchParams
 
+        params.append('ep', 'ccm'); // EntryPoint
+        params.append('re', 'dcsp'); // RenderingEnvironment - DesktopChromeSurfaceProto
         params.append('s', '' + 4); // SurfaceProtoValue - Surface.CHROMIUM
-        params.append('re', 'df'); // RenderingEnvironment - DesktopWebFullscreen
-        params.append('stcs', '' + Date.now()); // timestamp
+        params.append('st', '' + Date.now()); // timestamp
+        params.append('sideimagesearch', '1');
         params.append('vpw', this.#config.viewport[0]); // viewport width
         params.append('vph', this.#config.viewport[1]); // viewport height
-        params.append('ep', 'subb'); // EntryPoint
 
         const headers = this.#generateHeaders();
 
@@ -129,14 +130,14 @@ export default class LensCore {
 
         this.#generateCookieHeader(headers);
 
-        const response = await this._fetch(String(url), {
+        let response = await this._fetch(String(url), {
             headers,
             redirect: 'manual',
             ...options,
             ...this.#config.fetchOptions
         });
 
-        const text = await response.text();
+        let text = await response.text();
 
         this.#setCookies(response.headers.get('set-cookie'));
 
@@ -192,24 +193,19 @@ export default class LensCore {
         }
     }
 
-    async scanByURL(url, dimensions = [0, 0]) {
-        const endpoint = new URL(LENS_API_ENDPOINT)
-
-        endpoint.searchParams.set('url', String(url))
-
-        const options = {
-            endpoint: String(endpoint),
-            method: 'GET',
-        }
-
-        return this.fetch(options, dimensions)
+    async scanByURL(url) {
+        const imgData = await fetch(url).then(r => r.arrayBuffer());
+        const ext = url.split('.').pop();
+        let mime = EXT_TO_MIME[ext];
+        if(!mime) mime = 'image/jpeg';
+        
+        return this.scanByData(imgData, mime);
     }
 
     async scanByData(uint8, mime, originalDimensions) {
         if (!SUPPORTED_MIMES.includes(mime)) {
             throw new Error('File type not supported');
         }
-        if(!originalDimensions) throw new Error('Original dimensions not set');
 
         let fileName = `image.${MIME_TO_EXT[mime]}`;
 
@@ -223,6 +219,7 @@ export default class LensCore {
         if (width > 1000 || height > 1000) {
             throw new Error('Image dimensions are larger than 1000x1000');
         }
+        if(!originalDimensions) originalDimensions = [width, height];
 
         const file = new File([uint8], fileName, { type: mime });
         const formdata = new FormData();
@@ -265,15 +262,14 @@ export default class LensCore {
             'Sec-Fetch-User': '?1',
             'Upgrade-Insecure-Requests': '1',
             'User-Agent': this.#config.userAgent,
-            'X-Client-Data': 'CIW2yQEIorbJAQipncoBCIH+ygEIlaHLAQj1mM0BCIWgzQEI3ezNAQji+s0BCOmFzgEIponOAQj1ic4BCIeLzgEY1d3NARjS/s0BGNiGzgE='
+            'X-Client-Data': 'CIW2yQEIorbJAQipncoBCIH+ygEIkqHLAQiKo8sBCPWYzQEIhaDNAQji0M4BCLPTzgEI19TOAQjy1c4BCJLYzgEIwNjOAQjM2M4BGM7VzgE='
             /*
-                X-Client-Data: CIW2yQEIorbJAQipncoBCIH+ygEIlaHLAQj1mM0BCIWgzQEI3ezNAQji+s0BCOmFzgEIponOAQj1ic4BCIeLzgEY1d3NARjS/s0BGNiGzgE=
                 Decoded:
                 message ClientVariations {
-                    // Active client experiment variation IDs.
-                    repeated int32 variation_id = [3300101, 3300130, 3313321, 3325697, 3330197, 3361909, 3362821, 3372637, 3374434, 3375849, 3376294, 3376373, 3376519];
-                    // Active client experiment variation IDs that trigger server-side behavior.
-                    repeated int32 trigger_variation_id = [3370709, 3374930, 3375960];
+                    // Active Google-visible variation IDs on this client. These are reported for analysis, but do not directly affect any server-side behavior.
+                    repeated int32 variation_id = [3300101, 3300130, 3313321, 3325697, 3330194, 3330442, 3361909, 3362821, 3385442, 3385779, 3385943, 3386098, 3386386, 3386432, 3386444];
+                    // Active Google-visible variation IDs on this client that trigger server-side behavior. These are reported for analysis *and* directly affect server-side behavior.
+                    repeated int32 trigger_variation_id = [3386062];
                 }
             */
         };
@@ -341,7 +337,7 @@ export default class LensCore {
             text_segments = fullTextPart[4][0][0];
             text_regions = data[2][3][0]
                 .filter(x => x[11].startsWith("text:"))
-                .map(x => x[1]);
+                .map(x => x[1] ? x[1] : x[6][0]);
         } catch (e) {
             // method 2
             // sometimes the text segments are not directly available

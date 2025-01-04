@@ -19,5 +19,18 @@ export const MIME_TO_EXT = {
     'image/png': 'png',
     'image/tiff': 'tiff',
     'image/webp': 'webp',
-    'image/heic': 'heic'
+    'image/heic': 'heic',
+    'image/gif': 'gif'
 };
+
+export const EXT_TO_MIME = {
+    'ico': 'image/x-icon',
+    'bmp': 'image/bmp',
+    'jpg': 'image/jpeg',
+    'png': 'image/png',
+    'tiff': 'image/tiff',
+    'webp': 'image/webp',
+    'heic': 'image/heic',
+    'gif': 'image/gif'
+};
+

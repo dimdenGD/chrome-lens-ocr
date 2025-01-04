@@ -17,8 +17,7 @@ const log = data => console.log(inspect(data, { depth: null, colors: true }));
 
 lens.scanByFile('shrimple.png').then(log).catch(console.error);
 lens.scanByBuffer(Buffer.from('...')).then(log).catch(console.error);
-
-// use image url to scan quicker, but pixel coordinates will be 0
+// fetches image and then scans it
 lens.scanByURL('https://lune.dimden.dev/7949f833fa42.png').then(log).catch(console.error);
 ```
 All methods above return `LensResult` object (see docs below). In case error happened during the process, `LensError` will be thrown.
@@ -43,8 +42,8 @@ This is the core class, which is extended by `Lens`. You can use it if you want 
 #### `constructor(options?: Object, fetch?: Function): LensCore`
 Creates a new instance of LensCore. `options` is optional. `fetch` is function that will be used to send requests, by default it's `fetch` from global scope.
 
-#### `scanByURL(url: String, dimensions?: [Number, Number] = [0, 0]): Promise<LensResult>`
-Scans an image from a remote URL, supports large image resolution. You may provide an optional image dimensions array, or else text segment coordinates (`result.segments[].pixelCoords`) from this method will always return 0.
+#### `scanByURL(url: String): Promise<LensResult>`
+Fetches an image from a remote URL, and scans it.
 
 #### `scanByData(data: Uint8Array, mime: String, originalDimensions: Array): Promise<LensResult>`
 Scans an image from a Uint8Array. `originalDimensions` is array of `[width, height]` format. You must provide width and height of image before it was resized to get accurate pixel coordinates. You should only use this method if you're using the library in environments that don't support Node.js APIs, because it doesn't automatically resize images to less than 1000x1000 dimensions, like methods in `Lens` do.
