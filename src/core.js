@@ -1,6 +1,7 @@
 import { imageDimensionsFromData } from 'image-dimensions';
 import setCookie from 'set-cookie-parser';
-import { LENS_PROTO_ENDPOINT, LENS_API_KEY, MIME_TO_EXT, SUPPORTED_MIMES } from './consts.js';
+import { LENS_PROTO_ENDPOINT, LENS_API_KEY, MIME_TO_EXT, EXT_TO_MIME, SUPPORTED_MIMES } from './consts.js';
+
 import { parseCookies, sleep } from './utils.js';
 
 const { LensOverlayServerRequest, LensOverlayObjectsRequest, LensOverlayRequestContext, LensOverlayServerResponse, LensOverlayServerError, LensOverlayServerErrorErrorType } = require('./utils/proto_generated/lens_overlay_server_pb.js');
