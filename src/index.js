@@ -1,8 +1,7 @@
 import { access, constants, readFile } from 'node:fs/promises';
 import { fileTypeFromBuffer } from 'file-type';
-// imageDimensionsFromData не нужен здесь, так как он используется в core.js и для ресайза в sharp
 import sharp from 'sharp';
-import { fetch } from 'undici'; // fetch для конструктора LensCore
+import { fetch } from 'undici';
 
 import LensCore, { LensResult, LensError, Segment, BoundingBox } from './core.js';
 
@@ -17,7 +16,7 @@ export default class Lens extends LensCore {
 
         let fetchFn = _fetch;
         if (!fetchFn) {
-            fetchFn = fetch; // Используем undici.fetch по умолчанию
+            fetchFn = fetch;
         }
         super(config, fetchFn);
     }
@@ -34,7 +33,7 @@ export default class Lens extends LensCore {
                 case 'EACCES': throw new Error(`Read permission denied: ${path}`);
                 case 'ENOENT': throw new Error(`File not found: ${path}`);
                 case 'EISDIR': throw new Error(`Expected file, Found directory: ${path}`);
-                default: throw error; // Перебрасываем другие ошибки
+                default: throw error;
             }
         }
 
@@ -46,14 +45,9 @@ export default class Lens extends LensCore {
         const fileType = await fileTypeFromBuffer(buffer);
 
         if (!fileType) {
-            // Если тип не определен, но это буфер, можно попытаться его обработать как есть
-            // или выбросить ошибку. Python скрипт просто передавал байты.
-            // Однако, для sharp лучше знать тип или он попытается угадать.
-            // Для proto API может быть важно, что это изображение.
              console.warn('Could not determine file type from buffer. Attempting to process anyway.');
         }
         
-        // Для сохранения оригинальных размеров для BoundingBox
         let originalWidth, originalHeight;
         try {
             const metadata = await sharp(buffer).metadata();
@@ -68,31 +62,24 @@ export default class Lens extends LensCore {
         }
 
         let imageToProcessBuffer = buffer;
-        let finalMime = fileType?.mime || 'image/png'; // По умолчанию PNG, если тип не определен
+        let finalMime = fileType?.mime || 'image/png';
 
-        // Логика изменения размера и формата
-        // Python скрипт ресайзил до ~3MP и конвертировал в PNG.
-        // Старый chrome-lens-ocr ресайзил до 1000x1000 и в JPEG.
-        // Выберем PNG и лимит, например, 1200x1200 (чуть больше 1000, но не слишком много)
-        const MAX_DIMENSION = 1200; // Можно сделать настраиваемым
+        const MAX_DIMENSION = 1200;
         if (originalWidth > MAX_DIMENSION || originalHeight > MAX_DIMENSION) {
             imageToProcessBuffer = await sharp(buffer)
                 .resize(MAX_DIMENSION, MAX_DIMENSION, { fit: 'inside', withoutEnlargement: true })
-                .png() // Конвертируем в PNG для Protobuf API
+                .png()
                 .toBuffer();
             finalMime = 'image/png';
         } else if (fileType && fileType.mime !== 'image/png') {
-            // Если изображение не слишком большое, но не PNG, все равно конвертируем в PNG
             imageToProcessBuffer = await sharp(buffer)
                 .png()
                 .toBuffer();
             finalMime = 'image/png';
         }
-        // Если это уже PNG и подходящего размера, imageToProcessBuffer останется исходным buffer.
-
+        
         const uint8Array = Uint8Array.from(imageToProcessBuffer);
-
-        // Передаем originalWidth, originalHeight для корректного расчета BoundingBox
+        
         return super.scanByData(uint8Array, finalMime, [originalWidth, originalHeight]);
     }
 }
