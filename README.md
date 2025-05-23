@@ -154,22 +154,6 @@ const lens = new Lens({
 });
 ```
 
-## Using in other environments
-
-> Due to recent changes, this section is mostly useless because non-Node.js environments are no longer supported.
-
-You can use this library in environments that don't support Node.js APIs by importing only the core, which doesn't include `scanByFile` and `scanByBuffer` methods. Instead, it has `scanByData` method, which accepts a `Uint8Array`, mime type and original image dimensions. Here's an example:
-```javascript
-import LensCore from 'chrome-lens-ocr/src/core.js';
-
-const lens = new LensCore();
-lens.scanByData(new Uint8Array([41, 40, 236, 244, 151, 101, 118, 16, 37, 138, 199, 229, 2, 75, 33]) 'image/png', [1280, 720]);
-```
-But in this case, you'll need to handle resizing images to less than 1000x1000 dimensions yourself, as larger images aren't supported by Google Lens.
-
-## Additional information
-In some of the EU countries, using any Google services requires cookie consent. This library handles it automatically, but it's pretty slow on first scan of the instance. So if you make a lot of new instances or always need it to be fast on first launch, you need to save cookies somewhere to avoid this. There's an example of how to do it in [cli.js](https://github.com/dimdenGD/chrome-lens-ocr/blob/main/cli.js).
-
 ## Custom Sharex OCR
 It's possible to use this package with Sharex to OCR images using Google Lens API, instead of bad default OCR in Sharex. Please refer to [SHAREX.md](https://github.com/dimdenGD/chrome-lens-ocr/blob/main/SHAREX.md) for instructions.
 
