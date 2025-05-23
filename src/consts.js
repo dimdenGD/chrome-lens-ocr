@@ -1,7 +1,9 @@
+export const LENS_PROTO_ENDPOINT = 'https://lensfrontend-pa.googleapis.com/v1/crupload';
+export const LENS_API_KEY = 'AIzaSyDr2UxVnv_U85AbhhY8XSHSIavUW0DC-sY';
+
 export const LENS_ENDPOINT = 'https://lens.google.com/v3/upload';
 export const LENS_API_ENDPOINT = 'https://lens.google.com/uploadbyurl';
 
-// ico, bmp, jfif, pjpeg, jpeg, pjp, jpg, png, tif, tiff, webp, heic
 export const SUPPORTED_MIMES = [
     'image/x-icon',
     'image/bmp',
@@ -33,4 +35,3 @@ export const EXT_TO_MIME = {
     'heic': 'image/heic',
     'gif': 'image/gif'
 };
-

@@ -1,13 +1,26 @@
 import { imageDimensionsFromData } from 'image-dimensions';
 import setCookie from 'set-cookie-parser';
-import { LENS_API_ENDPOINT, LENS_ENDPOINT, MIME_TO_EXT, EXT_TO_MIME, SUPPORTED_MIMES } from './consts.js';
+import { LENS_PROTO_ENDPOINT, LENS_API_KEY, MIME_TO_EXT, EXT_TO_MIME, SUPPORTED_MIMES } from './consts.js';
+
 import { parseCookies, sleep } from './utils.js';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
+const { LensOverlayServerRequest, LensOverlayObjectsRequest, LensOverlayRequestContext, LensOverlayServerResponse, LensOverlayServerError, LensOverlayServerErrorErrorType } = require('./utils/proto_generated/lens_overlay_server_pb.cjs');
+const { LensOverlayClientContext, LocaleContext, ClientLoggingData } = require('./utils/proto_generated/lens_overlay_client_context_pb.cjs');
+const { Platform, Surface } = require('./utils/proto_generated/lens_overlay_client_platform_pb.cjs');
+const { ImageData, ImagePayload, ImageMetadata } = require('./utils/proto_generated/lens_overlay_image_data_pb.cjs');
+const { LensOverlayRequestId } = require('./utils/proto_generated/lens_overlay_request_id_pb.cjs');
+const { AppliedFilter, AppliedFilters, LensOverlayFilterType } = require('./utils/proto_generated/lens_overlay_filters_pb.cjs');
+const { Text, TextLayout, TextLayoutParagraph, TextLayoutLine, TextLayoutWord, WritingDirection, Alignment } = require('./utils/proto_generated/lens_overlay_text_pb.cjs');
+const { Geometry, CenterRotatedBox, CoordinateType } = require('./utils/proto_generated/lens_overlay_geometry_pb.cjs');
+
 
 export class BoundingBox {
     #imageDimensions;
     constructor(box, imageDimensions) {
-        if(!box) throw new Error('Bounding box not set');
-        if(!imageDimensions || imageDimensions.length !== 2) throw new Error('Image dimensions not set');
+        if (!box || box.length !== 4) throw new Error('Bounding box array [centerPerX, centerPerY, perWidth, perHeight] not set or invalid');
+        if (!imageDimensions || imageDimensions.length !== 2) throw new Error('Image dimensions [width, height] not set or invalid');
 
         this.#imageDimensions = imageDimensions;
 
@@ -46,9 +59,9 @@ export class LensError extends Error {
 }
 
 export class Segment {
-    constructor(text, boundingBox, imageDimensions) {
+    constructor(text, boundingBox) {
         this.text = text;
-        this.boundingBox = new BoundingBox(boundingBox, imageDimensions);
+        this.boundingBox = boundingBox;
     }
 }
 
@@ -58,6 +71,7 @@ export class LensResult {
         this.segments = segments;
     }
 }
+
 
 export default class LensCore {
     #config = {};
@@ -71,22 +85,21 @@ export default class LensCore {
 
         if (fetch) this._fetch = fetch;
 
-        const chromeVersion = config?.chromeVersion ?? '131.0.6778.205';
-        const majorChromeVersion = config?.chromeVersion?.split('.')[0] ?? chromeVersion.split('.')[0];
+        const chromeVersion = config?.chromeVersion ?? '124.0.6367.60';
+        const majorChromeVersion = config?.majorChromeVersion ?? chromeVersion.split('.')[0];
 
         this.#config = {
             chromeVersion,
             majorChromeVersion,
-            sbisrc: `Google Chrome ${chromeVersion} (Official) Windows`,
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-            endpoint: LENS_ENDPOINT,
-            viewport: [1920, 1080],
+            userAgent: config?.userAgent ?? `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${majorChromeVersion}.0.0.0 Safari/537.36`,
+            endpoint: LENS_PROTO_ENDPOINT,
+            viewport: config?.viewport ?? [1920, 1080],
             headers: {},
             fetchOptions: {},
+            targetLanguage: config?.targetLanguage ?? 'en',
             ...config
         };
 
-        // lowercase all headers
         for (const key in this.#config.headers) {
             const value = this.#config.headers[key];
             if (!value) {
@@ -98,7 +111,6 @@ export default class LensCore {
                 this.#config.headers[key.toLowerCase()] = value;
             }
         }
-
         this.#parseCookies();
     }
 
@@ -106,270 +118,266 @@ export default class LensCore {
         for (const key in options) {
             this.#config[key] = options[key];
         }
-
         this.#parseCookies();
     }
 
-    async fetch(options = {}, originalDimensions = [0, 0], secondTry = false) {
-        const url = new URL(options.endpoint || this.#config.endpoint)
-        const params = url.searchParams
+    #createLensProtoRequest(imageBytesUint8Array, width, height) {
+        const targetLanguage = this.#config.targetLanguage;
 
-        params.append('ep', 'ccm'); // EntryPoint
-        params.append('re', 'dcsp'); // RenderingEnvironment - DesktopChromeSurfaceProto
-        params.append('s', '' + 4); // SurfaceProtoValue - Surface.CHROMIUM
-        params.append('st', '' + Date.now()); // timestamp
-        params.append('sideimagesearch', '1');
-        params.append('vpw', this.#config.viewport[0]); // viewport width
-        params.append('vph', this.#config.viewport[1]); // viewport height
+        const requestId = new LensOverlayRequestId();
+        requestId.setUuid(String(Date.now()) + String(Math.floor(Math.random() * 1000000)));
+        requestId.setSequenceId(1);
+        requestId.setImageSequenceId(1);
 
-        const headers = this.#generateHeaders();
+        const localeContext = new LocaleContext();
+        localeContext.setLanguage(targetLanguage);
+        localeContext.setRegion(this.#config.region || 'US');
+        localeContext.setTimeZone(this.#config.timeZone || 'America/New_York');
 
-        for (const key in this.#config.headers) {
-            headers[key] = this.#config.headers[key];
+        const appliedFilter = new AppliedFilter();
+        appliedFilter.setFilterType(LensOverlayFilterType.AUTO_FILTER);
+        const clientFilters = new AppliedFilters();
+        clientFilters.addFilter(appliedFilter);
+
+        const clientContext = new LensOverlayClientContext();
+        clientContext.setPlatform(Platform.WEB);
+        clientContext.setSurface(Surface.CHROMIUM);
+        clientContext.setLocaleContext(localeContext);
+        clientContext.setClientFilters(clientFilters);
+
+        const requestContext = new LensOverlayRequestContext();
+        requestContext.setRequestId(requestId);
+        requestContext.setClientContext(clientContext);
+
+        const imageMetadata = new ImageMetadata();
+        imageMetadata.setWidth(width);
+        imageMetadata.setHeight(height);
+
+        const imagePayload = new ImagePayload();
+        imagePayload.setImageBytes(imageBytesUint8Array);
+
+        const imageData = new ImageData();
+        imageData.setPayload(imagePayload);
+        imageData.setImageMetadata(imageMetadata);
+
+        const objectsRequest = new LensOverlayObjectsRequest();
+        objectsRequest.setRequestContext(requestContext);
+        objectsRequest.setImageData(imageData);
+
+        const serverRequest = new LensOverlayServerRequest();
+        serverRequest.setObjectsRequest(objectsRequest);
+
+        return serverRequest.serializeBinary();
+    }
+
+    #parseLensProtoResponse(serverResponseProto, originalImageDimensions) {
+        if (serverResponseProto.hasError()) {
+            const errorProto = serverResponseProto.getError();
+            const errorTypeName = Object.keys(LensOverlayServerErrorErrorType).find(key => LensOverlayServerErrorErrorType[key] === errorProto.getErrorType());
+            console.warn(`Lens server returned error: Type=${errorProto.getErrorType()} (${errorTypeName})`);
+            if (errorProto.getErrorType() !== LensOverlayServerErrorErrorType.UNKNOWN_TYPE) {
+                 return new LensResult('', []);
+            }
         }
 
+        if (!serverResponseProto.hasObjectsResponse()) {
+            return new LensResult('', []);
+        }
+        const objectsResponse = serverResponseProto.getObjectsResponse();
+
+        if (!objectsResponse.hasText() || !objectsResponse.getText().hasTextLayout()) {
+            return new LensResult('', []);
+        }
+
+        const textProto = objectsResponse.getText();
+        const textLayout = textProto.getTextLayout();
+        const detectedLanguage = textProto.getContentLanguage() || (textLayout.getParagraphsList()[0]?.getContentLanguage()) || '';
+
+        const segments = [];
+
+        for (const paragraph of textLayout.getParagraphsList()) {
+            for (const line of paragraph.getLinesList()) {
+                let lineTextContent = '';
+                const wordsList = line.getWordsList();
+                for (let i = 0; i < wordsList.length; i++) {
+                    const word = wordsList[i];
+                    lineTextContent += word.getPlainText();
+                    if (word.hasTextSeparator()) {
+                         lineTextContent += word.getTextSeparator();
+                    } else if (i < wordsList.length -1) {
+                        lineTextContent += ' ';
+                    }
+                }
+                lineTextContent = lineTextContent.replace(/\s+/g, ' ').trim();
+
+                if (lineTextContent) {
+                    let boundingBox = null;
+                    if (line.hasGeometry() && line.getGeometry().hasBoundingBox()) {
+                        const protoGeoBox = line.getGeometry().getBoundingBox();
+                        if (protoGeoBox.getCoordinateType() === CoordinateType.NORMALIZED) {
+                             const boxData = [
+                                protoGeoBox.getCenterX(),
+                                protoGeoBox.getCenterY(),
+                                protoGeoBox.getWidth(),
+                                protoGeoBox.getHeight()
+                            ];
+                            boundingBox = new BoundingBox(boxData, originalImageDimensions);
+                        }
+                    }
+                    if (!boundingBox && paragraph.hasGeometry() && paragraph.getGeometry().hasBoundingBox()) {
+                         const protoGeoBox = paragraph.getGeometry().getBoundingBox();
+                         if (protoGeoBox.getCoordinateType() === CoordinateType.NORMALIZED) {
+                            const boxData = [
+                                protoGeoBox.getCenterX(),
+                                protoGeoBox.getCenterY(),
+                                protoGeoBox.getWidth(),
+                                protoGeoBox.getHeight()
+                            ];
+                            boundingBox = new BoundingBox(boxData, originalImageDimensions);
+                        }
+                    }
+                    if (!boundingBox) {
+                        boundingBox = new BoundingBox([0.5, 0.5, 1, 1], originalImageDimensions);
+                    }
+                    segments.push(new Segment(lineTextContent, boundingBox));
+                }
+            }
+        }
+        return new LensResult(detectedLanguage, segments);
+    }
+
+    async _sendProtoRequest(serializedRequestUint8Array) {
+        const headers = {
+            'Content-Type': 'application/x-protobuf',
+            'X-Goog-Api-Key': LENS_API_KEY,
+            'User-Agent': this.#config.userAgent,
+            'Accept': '*/*',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Language': this.#config.targetLanguage ? `${this.#config.targetLanguage},en;q=0.9` : 'en-US,en;q=0.9',
+            ...this.#config.headers,
+        };
         this.#generateCookieHeader(headers);
 
-        let response = await this._fetch(String(url), {
+        const response = await this._fetch(LENS_PROTO_ENDPOINT, {
+            method: 'POST',
             headers,
-            redirect: 'manual',
-            ...options,
+            body: serializedRequestUint8Array,
+            redirect: 'follow',
             ...this.#config.fetchOptions
         });
 
-        let text = await response.text();
-
         this.#setCookies(response.headers.get('set-cookie'));
 
-        // in some of the EU countries, Google requires cookie consent
-        if (response.status === 302) {
-            if (secondTry) {
-                throw new LensError('Lens returned a 302 status code twice', response.status, response.headers, text);
-            }
-
-            const consentHeaders = this.#generateHeaders();
-            consentHeaders['Content-Type'] = 'application/x-www-form-urlencoded';
-            consentHeaders.Referer = 'https://consent.google.com/';
-            consentHeaders.Origin = 'https://consent.google.com';
-
-            this.#generateCookieHeader(consentHeaders);
-
-            const location = response.headers.get('Location');
-
-            if (!location) throw new Error('Location header not found');
-
-            const redirectLink = new URL(location);
-            const params = redirectLink.searchParams;
-            params.append('x', '6');
-            params.append('set_eom', 'true');
-            params.append('bl', 'boq_identityfrontenduiserver_20240129.02_p0');
-            params.append('app', '0');
-
-            await sleep(500); // to not be suspicious
-            const saveConsentRequest = await fetch('https://consent.google.com/save', {
-                method: 'POST',
-                headers: consentHeaders,
-                body: params.toString(),
-                redirect: 'manual'
-            });
-
-            if (saveConsentRequest.status === 303) {
-                // consent was saved, save new cookies and retry the request
-                this.#setCookies(saveConsentRequest.headers.get('set-cookie'));
-                await sleep(500);
-                return this.fetch({}, originalDimensions, true);
-            }
+        if (!response.ok) {
+            const errorBodyText = await response.text().catch(() => 'Could not read error body');
+            throw new LensError(
+                `Lens Protobuf API request failed with status ${response.status}`,
+                String(response.status),
+                response.headers,
+                errorBodyText
+            );
         }
 
-        if (response.status !== 200) {
-            throw new LensError('Lens returned a non-200 status code', response.status, response.headers, text);
-        }
-
-        try {
-            const afData = LensCore.getAFData(text);
-            return LensCore.parseResult(afData, originalDimensions);
-        } catch (e) {
-            throw new LensError(`Could not parse response: ${e.stack}`, response.status, response.headers, text);
-        }
+        const responseArrayBuffer = await response.arrayBuffer();
+        const responseUint8Array = new Uint8Array(responseArrayBuffer);
+        return LensOverlayServerResponse.deserializeBinary(responseUint8Array);
     }
 
     async scanByURL(url) {
-        const imgData = await fetch(url).then(r => r.arrayBuffer());
-        const ext = url.split('.').pop();
-        let mime = EXT_TO_MIME[ext];
-        if(!mime) mime = 'image/jpeg';
+        const imageResponse = await this._fetch(url);
+        if (!imageResponse.ok) {
+            throw new Error(`Failed to fetch image from URL: ${url}, status: ${imageResponse.status}`);
+        }
+        const imageBuffer = await imageResponse.arrayBuffer();
+        const uint8ImgArray = new Uint8Array(imageBuffer);
+
+        let mime = 'image/jpeg';
+        const ext = url.split('.').pop().toLowerCase();
+        if (ext && EXT_TO_MIME[ext]) {
+            mime = EXT_TO_MIME[ext];
+        }
         
-        return this.scanByData(imgData, mime);
-    }
-
-    async scanByData(uint8, mime, originalDimensions) {
-        if (!SUPPORTED_MIMES.includes(mime)) {
-            throw new Error('File type not supported');
-        }
-
-        let fileName = `image.${MIME_TO_EXT[mime]}`;
-
-        const dimensions = imageDimensionsFromData(uint8);
+        const dimensions = imageDimensionsFromData(uint8ImgArray);
         if (!dimensions) {
-            throw new Error('Could not determine image dimensions');
+            throw new Error('Could not determine image dimensions from URL.');
         }
-
-        const { width, height } = dimensions;
-        // Google Lens does not accept images larger than 1000x1000
-        if (width > 1000 || height > 1000) {
-            throw new Error('Image dimensions are larger than 1000x1000');
-        }
-        if(!originalDimensions) originalDimensions = [width, height];
-
-        const file = new File([uint8], fileName, { type: mime });
-        const formdata = new FormData();
-
-        formdata.append('encoded_image', file);
-        formdata.append('original_width', '' + width);
-        formdata.append('original_height', '' + height);
-        formdata.append('processed_image_dimensions', `${width},${height}`);
-
-        const options = {
-            endpoint: LENS_ENDPOINT,
-            method: 'POST',
-            body: formdata,
-        }
-
-        return this.fetch(options, originalDimensions);
+        
+        return this.scanByData(uint8ImgArray, mime, [dimensions.width, dimensions.height]);
     }
 
-    #generateHeaders() {
-        return {
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Cache-Control': 'max-age=0',
-            'Origin': 'https://lens.google.com',
-            'Referer': 'https://lens.google.com/',
-            'Sec-Ch-Ua': `"Not A(Brand";v="99", "Google Chrome";v="${this.#config.majorChromeVersion}", "Chromium";v="${this.#config.majorChromeVersion}"`,
-            'Sec-Ch-Ua-Arch': '"x86"',
-            'Sec-Ch-Ua-Bitness': '"64"',
-            'Sec-Ch-Ua-Full-Version': `"${this.#config.chromeVersion}"`,
-            'Sec-Ch-Ua-Full-Version-List': `"Not A(Brand";v="99.0.0.0", "Google Chrome";v="${this.#config.majorChromeVersion}", "Chromium";v="${this.#config.majorChromeVersion}"`,
-            'Sec-Ch-Ua-Mobile': '?0',
-            'Sec-Ch-Ua-Model': '""',
-            'Sec-Ch-Ua-Platform': '"Windows"',
-            'Sec-Ch-Ua-Platform-Version': '"15.0.0"',
-            'Sec-Ch-Ua-Wow64': '?0',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'same-origin',
-            'Sec-Fetch-User': '?1',
-            'Upgrade-Insecure-Requests': '1',
-            'User-Agent': this.#config.userAgent,
-            'X-Client-Data': 'CIW2yQEIorbJAQipncoBCIH+ygEIkqHLAQiKo8sBCPWYzQEIhaDNAQji0M4BCLPTzgEI19TOAQjy1c4BCJLYzgEIwNjOAQjM2M4BGM7VzgE='
-            /*
-                Decoded:
-                message ClientVariations {
-                    // Active Google-visible variation IDs on this client. These are reported for analysis, but do not directly affect any server-side behavior.
-                    repeated int32 variation_id = [3300101, 3300130, 3313321, 3325697, 3330194, 3330442, 3361909, 3362821, 3385442, 3385779, 3385943, 3386098, 3386386, 3386432, 3386444];
-                    // Active Google-visible variation IDs on this client that trigger server-side behavior. These are reported for analysis *and* directly affect server-side behavior.
-                    repeated int32 trigger_variation_id = [3386062];
-                }
-            */
-        };
+    async scanByData(uint8Array, mime, originalDimensions) {
+        if (!SUPPORTED_MIMES.includes(mime) && mime !== 'image/gif') {
+            console.warn(`MIME type ${mime} might not be directly supported by the proto API, conversion recommended.`);
+        }
+
+        const actualDimensions = imageDimensionsFromData(uint8Array);
+         if (!actualDimensions) {
+            throw new Error('Could not determine actual image dimensions for proto request.');
+        }
+
+        const serializedRequest = this.#createLensProtoRequest(uint8Array, actualDimensions.width, actualDimensions.height);
+        const serverResponse = await this._sendProtoRequest(serializedRequest);
+        
+        return this.#parseLensProtoResponse(serverResponse, originalDimensions || [actualDimensions.width, actualDimensions.height]);
     }
 
     #generateCookieHeader(header) {
         if (Object.keys(this.cookies).length > 0) {
-            this.cookies = Object.fromEntries(Object.entries(this.cookies).filter(([name, cookie]) => cookie.expires > Date.now()));
-            header.cookie = Object.entries(this.cookies)
-                .map(([name, cookie]) => `${name}=${cookie.value}`).join('; ');
+            const validCookies = Object.entries(this.cookies).filter(([name, cookie]) => !cookie.expires || cookie.expires > Date.now());
+            this.cookies = Object.fromEntries(validCookies);
+            if (validCookies.length > 0) {
+                 header.cookie = validCookies.map(([name, cookie]) => `${name}=${cookie.value}`).join('; ');
+            }
         }
     }
 
     #setCookies(combinedCookieHeader) {
-        const splitCookieHeaders = setCookie.splitCookiesString(combinedCookieHeader);
-        const cookies = setCookie.parse(splitCookieHeaders);
+        if (!combinedCookieHeader) return;
+        try {
+            const splitCookieHeaders = setCookie.splitCookiesString(combinedCookieHeader);
+            const cookies = setCookie.parse(splitCookieHeaders, { decodeValues: false });
 
-        if (cookies.length > 0) {
-            for (const cookie of cookies) {
-                this.cookies[cookie.name] = cookie;
-                cookie.expires = cookie.expires.getTime();
+            if (cookies.length > 0) {
+                for (const cookie of cookies) {
+                    if (cookie.name && cookie.value) {
+                        this.cookies[cookie.name] = {
+                            ...cookie,
+                            expires: cookie.expires ? new Date(cookie.expires).getTime() : Infinity,
+                        };
+                    }
+                }
             }
+        } catch (error) {
+            console.error("Failed to parse or set cookies:", error);
         }
     }
 
     #parseCookies() {
-        if (this.#config?.headers?.cookie) {
-            if (typeof this.#config?.headers?.cookie === 'string') {
-                // parse cookies from string
-                const cookies = parseCookies(this.#config.headers.cookie);
-                for (const cookie in cookies) {
-                    this.cookies[cookie] = {
-                        name: cookie,
-                        value: cookies[cookie],
+        const cookieHeader = this.#config?.headers?.cookie;
+        if (cookieHeader) {
+            if (typeof cookieHeader === 'string') {
+                const parsed = parseCookies(cookieHeader);
+                for (const name in parsed) {
+                    this.cookies[name] = {
+                        name,
+                        value: parsed[name],
                         expires: Infinity
                     };
                 }
-            } else {
-                this.cookies = this.#config.headers.cookie;
-            }
-        }
-    }
-
-    static getAFData(text) {
-        const callbacks = text.match(/AF_initDataCallback\((\{.*?\})\)/gms);
-        const lensCallback = callbacks.find(c => c.includes('DetectedObject'));
-
-        if (!lensCallback) {
-            console.log(callbacks);
-            throw new Error('Could not find matching AF_initDataCallback');
-        }
-
-        const match = lensCallback.match(/AF_initDataCallback\((\{.*?\})\)/ms);
-
-        return eval(`(${match[1]})`);
-    }
-
-    static parseResult(afData, imageDimensions) {
-        const data = afData.data;
-        const fullTextPart = data[3];
-        let text_segments = [], text_regions = [];
-
-        try {
-            // method 1, get text segments and regions directly
-            text_segments = fullTextPart[4][0][0];
-            text_regions = data[2][3][0]
-                .filter(x => x[11].startsWith("text:"))
-                .map(x => x[1] ? x[1] : x[6][0]);
-        } catch (e) {
-            // method 2
-            // sometimes the text segments are not directly available
-            // try to get them from text parts
-            let big_parts = fullTextPart[2][0];
-            for(let big_part of big_parts) {
-                let parts = big_part[0];
-                for(let part of parts) {
-                    let text = part[0].reduce((a, b) => {
-                        return a + b[0] + (b[3] ?? '');
-                    }, '');
-
-                    // region data is different format from method 1
-                    // instead of [centerX, centerY, width, height] it's [topLeftY, topLeftX, width, height]
-                    // so we need to convert it
-                    let region = part[1];
-                    let [y, x, width, height] = region;
-                    let centerX = x + (width / 2), centerY = y + (height / 2);
-                    region = [centerX, centerY, width, height];
-
-                    text_segments.push(text);
-                    text_regions.push(region);
+            } else if (typeof cookieHeader === 'object') {
+                 for (const name in cookieHeader) {
+                    if (typeof cookieHeader[name] === 'object' && cookieHeader[name].value !== undefined) {
+                        this.cookies[name] = {
+                            name,
+                            value: cookieHeader[name].value,
+                            expires: cookieHeader[name].expires || Infinity,
+                            ...cookieHeader[name]
+                        };
+                    } else if (typeof cookieHeader[name] === 'string') {
+                         this.cookies[name] = { name, value: cookieHeader[name], expires: Infinity};
+                    }
                 }
             }
         }
-
-        const segments = [];
-        for (const i in text_segments) {
-            const segment = new Segment(text_segments[i], text_regions[i], imageDimensions);
-            segments.push(segment);
-        }
-
-        return new LensResult(fullTextPart[3], segments);
     }
 }
