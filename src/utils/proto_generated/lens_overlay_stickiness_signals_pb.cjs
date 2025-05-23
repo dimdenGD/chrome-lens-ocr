@@ -21,9 +21,9 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_math_solver_query_pb = require('./lens_overlay_math_solver_query_pb.js');
+var lens_overlay_math_solver_query_pb = require('./lens_overlay_math_solver_query_pb.cjs');
 goog.object.extend(proto, lens_overlay_math_solver_query_pb);
-var lens_overlay_message_set_pb = require('./lens_overlay_message_set_pb.js');
+var lens_overlay_message_set_pb = require('./lens_overlay_message_set_pb.cjs');
 goog.object.extend(proto, lens_overlay_message_set_pb);
 goog.exportSymbol('proto.lens.EducationInputExtension', null, global);
 goog.exportSymbol('proto.lens.StickinessSignals', null, global);

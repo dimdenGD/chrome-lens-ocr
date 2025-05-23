@@ -21,11 +21,11 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_filters_pb = require('./lens_overlay_filters_pb.js');
+var lens_overlay_filters_pb = require('./lens_overlay_filters_pb.cjs');
 goog.object.extend(proto, lens_overlay_filters_pb);
-var lens_overlay_platform_pb = require('./lens_overlay_platform_pb.js');
+var lens_overlay_platform_pb = require('./lens_overlay_platform_pb.cjs');
 goog.object.extend(proto, lens_overlay_platform_pb);
-var lens_overlay_surface_pb = require('./lens_overlay_surface_pb.js');
+var lens_overlay_surface_pb = require('./lens_overlay_surface_pb.cjs');
 goog.object.extend(proto, lens_overlay_surface_pb);
 goog.exportSymbol('proto.lens.ClientLoggingData', null, global);
 goog.exportSymbol('proto.lens.LensOverlayClientContext', null, global);
@@ -992,7 +992,7 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_phase_latencies_metadata_pb = require('./lens_overlay_phase_latencies_metadata_pb.js');
+var lens_overlay_phase_latencies_metadata_pb = require('./lens_overlay_phase_latencies_metadata_pb.cjs');
 goog.object.extend(proto, lens_overlay_phase_latencies_metadata_pb);
 goog.exportSymbol('proto.lens.LensOverlayClientLogs', null, global);
 goog.exportSymbol('proto.lens.LensOverlayClientLogs.LensOverlayEntryPoint', null, global);
@@ -1382,7 +1382,7 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_routing_info_pb = require('./lens_overlay_routing_info_pb.js');
+var lens_overlay_routing_info_pb = require('./lens_overlay_routing_info_pb.cjs');
 goog.object.extend(proto, lens_overlay_routing_info_pb);
 goog.exportSymbol('proto.lens.LensOverlayClusterInfo', null, global);
 /**
@@ -1641,7 +1641,7 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_text_pb = require('./lens_overlay_text_pb.js');
+var lens_overlay_text_pb = require('./lens_overlay_text_pb.cjs');
 goog.object.extend(proto, lens_overlay_text_pb);
 goog.exportSymbol('proto.lens.DeepGleamData', null, global);
 goog.exportSymbol('proto.lens.DeepGleamData.RenderingOneofCase', null, global);
@@ -4645,7 +4645,7 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_polygon_pb = require('./lens_overlay_polygon_pb.js');
+var lens_overlay_polygon_pb = require('./lens_overlay_polygon_pb.cjs');
 goog.object.extend(proto, lens_overlay_polygon_pb);
 goog.exportSymbol('proto.lens.CenterRotatedBox', null, global);
 goog.exportSymbol('proto.lens.Geometry', null, global);
@@ -5469,9 +5469,9 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_geometry_pb = require('./lens_overlay_geometry_pb.js');
+var lens_overlay_geometry_pb = require('./lens_overlay_geometry_pb.cjs');
 goog.object.extend(proto, lens_overlay_geometry_pb);
-var lens_overlay_payload_pb = require('./lens_overlay_payload_pb.js');
+var lens_overlay_payload_pb = require('./lens_overlay_payload_pb.cjs');
 goog.object.extend(proto, lens_overlay_payload_pb);
 goog.exportSymbol('proto.lens.ImageCrop', null, global);
 /**
@@ -5751,7 +5751,7 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_geometry_pb = require('./lens_overlay_geometry_pb.js');
+var lens_overlay_geometry_pb = require('./lens_overlay_geometry_pb.cjs');
 goog.object.extend(proto, lens_overlay_geometry_pb);
 goog.exportSymbol('proto.lens.ImageData', null, global);
 goog.exportSymbol('proto.lens.ImageMetadata', null, global);
@@ -6419,9 +6419,9 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_geometry_pb = require('./lens_overlay_geometry_pb.js');
+var lens_overlay_geometry_pb = require('./lens_overlay_geometry_pb.cjs');
 goog.object.extend(proto, lens_overlay_geometry_pb);
-var lens_overlay_text_query_pb = require('./lens_overlay_text_query_pb.js');
+var lens_overlay_text_query_pb = require('./lens_overlay_text_query_pb.cjs');
 goog.object.extend(proto, lens_overlay_text_query_pb);
 goog.exportSymbol('proto.lens.LensOverlayInteractionRequestMetadata', null, global);
 goog.exportSymbol('proto.lens.LensOverlayInteractionRequestMetadata.QueryMetadata', null, global);
@@ -7751,7 +7751,7 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_translate_stickiness_signals_pb = require('./lens_overlay_translate_stickiness_signals_pb.js');
+var lens_overlay_translate_stickiness_signals_pb = require('./lens_overlay_translate_stickiness_signals_pb.cjs');
 goog.object.extend(proto, lens_overlay_translate_stickiness_signals_pb);
 goog.exportSymbol('proto.lens.Argument', null, global);
 goog.exportSymbol('proto.lens.ArgumentValue', null, global);
@@ -8811,7 +8811,7 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_knowledge_intent_query_pb = require('./lens_overlay_knowledge_intent_query_pb.js');
+var lens_overlay_knowledge_intent_query_pb = require('./lens_overlay_knowledge_intent_query_pb.cjs');
 goog.object.extend(proto, lens_overlay_knowledge_intent_query_pb);
 goog.exportSymbol('proto.lens.Query', null, global);
 /**
@@ -9186,7 +9186,7 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_knowledge_query_pb = require('./lens_overlay_knowledge_query_pb.js');
+var lens_overlay_knowledge_query_pb = require('./lens_overlay_knowledge_query_pb.cjs');
 goog.object.extend(proto, lens_overlay_knowledge_query_pb);
 goog.exportSymbol('proto.lens.MessageSet', null, global);
 /**
@@ -9385,7 +9385,7 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_geometry_pb = require('./lens_overlay_geometry_pb.js');
+var lens_overlay_geometry_pb = require('./lens_overlay_geometry_pb.cjs');
 goog.object.extend(proto, lens_overlay_geometry_pb);
 goog.exportSymbol('proto.lens.OverlayObject', null, global);
 goog.exportSymbol('proto.lens.OverlayObject.InteractionProperties', null, global);
@@ -11593,7 +11593,7 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_routing_info_pb = require('./lens_overlay_routing_info_pb.js');
+var lens_overlay_routing_info_pb = require('./lens_overlay_routing_info_pb.cjs');
 goog.object.extend(proto, lens_overlay_routing_info_pb);
 goog.exportSymbol('proto.lens.LensOverlayRequestId', null, global);
 /**
@@ -12281,11 +12281,11 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_client_logs_pb = require('./lens_overlay_client_logs_pb.js');
+var lens_overlay_client_logs_pb = require('./lens_overlay_client_logs_pb.cjs');
 goog.object.extend(proto, lens_overlay_client_logs_pb);
-var lens_overlay_routing_info_pb = require('./lens_overlay_routing_info_pb.js');
+var lens_overlay_routing_info_pb = require('./lens_overlay_routing_info_pb.cjs');
 goog.object.extend(proto, lens_overlay_routing_info_pb);
-var lens_overlay_service_deps_pb = require('./lens_overlay_service_deps_pb.js');
+var lens_overlay_service_deps_pb = require('./lens_overlay_service_deps_pb.cjs');
 goog.object.extend(proto, lens_overlay_service_deps_pb);
 goog.exportSymbol('proto.lens.LensOverlayServerClusterInfoRequest', null, global);
 goog.exportSymbol('proto.lens.LensOverlayServerClusterInfoResponse', null, global);
@@ -13407,27 +13407,27 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_client_context_pb = require('./lens_overlay_client_context_pb.js');
+var lens_overlay_client_context_pb = require('./lens_overlay_client_context_pb.cjs');
 goog.object.extend(proto, lens_overlay_client_context_pb);
-var lens_overlay_cluster_info_pb = require('./lens_overlay_cluster_info_pb.js');
+var lens_overlay_cluster_info_pb = require('./lens_overlay_cluster_info_pb.cjs');
 goog.object.extend(proto, lens_overlay_cluster_info_pb);
-var lens_overlay_deep_gleam_data_pb = require('./lens_overlay_deep_gleam_data_pb.js');
+var lens_overlay_deep_gleam_data_pb = require('./lens_overlay_deep_gleam_data_pb.cjs');
 goog.object.extend(proto, lens_overlay_deep_gleam_data_pb);
-var lens_overlay_document_pb = require('./lens_overlay_document_pb.js');
+var lens_overlay_document_pb = require('./lens_overlay_document_pb.cjs');
 goog.object.extend(proto, lens_overlay_document_pb);
-var lens_overlay_image_crop_pb = require('./lens_overlay_image_crop_pb.js');
+var lens_overlay_image_crop_pb = require('./lens_overlay_image_crop_pb.cjs');
 goog.object.extend(proto, lens_overlay_image_crop_pb);
-var lens_overlay_image_data_pb = require('./lens_overlay_image_data_pb.js');
+var lens_overlay_image_data_pb = require('./lens_overlay_image_data_pb.cjs');
 goog.object.extend(proto, lens_overlay_image_data_pb);
-var lens_overlay_interaction_request_metadata_pb = require('./lens_overlay_interaction_request_metadata_pb.js');
+var lens_overlay_interaction_request_metadata_pb = require('./lens_overlay_interaction_request_metadata_pb.cjs');
 goog.object.extend(proto, lens_overlay_interaction_request_metadata_pb);
-var lens_overlay_overlay_object_pb = require('./lens_overlay_overlay_object_pb.js');
+var lens_overlay_overlay_object_pb = require('./lens_overlay_overlay_object_pb.cjs');
 goog.object.extend(proto, lens_overlay_overlay_object_pb);
-var lens_overlay_request_id_pb = require('./lens_overlay_request_id_pb.js');
+var lens_overlay_request_id_pb = require('./lens_overlay_request_id_pb.cjs');
 goog.object.extend(proto, lens_overlay_request_id_pb);
-var lens_overlay_request_type_pb = require('./lens_overlay_request_type_pb.js');
+var lens_overlay_request_type_pb = require('./lens_overlay_request_type_pb.cjs');
 goog.object.extend(proto, lens_overlay_request_type_pb);
-var lens_overlay_text_pb = require('./lens_overlay_text_pb.js');
+var lens_overlay_text_pb = require('./lens_overlay_text_pb.cjs');
 goog.object.extend(proto, lens_overlay_text_pb);
 goog.exportSymbol('proto.lens.ChunkDebugMetadata', null, global);
 goog.exportSymbol('proto.lens.ChunkDebugOptions', null, global);
@@ -17076,9 +17076,9 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_math_solver_query_pb = require('./lens_overlay_math_solver_query_pb.js');
+var lens_overlay_math_solver_query_pb = require('./lens_overlay_math_solver_query_pb.cjs');
 goog.object.extend(proto, lens_overlay_math_solver_query_pb);
-var lens_overlay_message_set_pb = require('./lens_overlay_message_set_pb.js');
+var lens_overlay_message_set_pb = require('./lens_overlay_message_set_pb.cjs');
 goog.object.extend(proto, lens_overlay_message_set_pb);
 goog.exportSymbol('proto.lens.EducationInputExtension', null, global);
 goog.exportSymbol('proto.lens.StickinessSignals', null, global);
@@ -17593,7 +17593,7 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_geometry_pb = require('./lens_overlay_geometry_pb.js');
+var lens_overlay_geometry_pb = require('./lens_overlay_geometry_pb.cjs');
 goog.object.extend(proto, lens_overlay_geometry_pb);
 goog.exportSymbol('proto.lens.Alignment', null, global);
 goog.exportSymbol('proto.lens.Text', null, global);
@@ -19855,7 +19855,7 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_video_context_input_params_pb = require('./lens_overlay_video_context_input_params_pb.js');
+var lens_overlay_video_context_input_params_pb = require('./lens_overlay_video_context_input_params_pb.cjs');
 goog.object.extend(proto, lens_overlay_video_context_input_params_pb);
 goog.exportSymbol('proto.lens.LensOverlayVideoParams', null, global);
 /**
@@ -20054,11 +20054,11 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_geometry_pb = require('./lens_overlay_geometry_pb.js');
+var lens_overlay_geometry_pb = require('./lens_overlay_geometry_pb.cjs');
 goog.object.extend(proto, lens_overlay_geometry_pb);
-var lens_overlay_interaction_request_metadata_pb = require('./lens_overlay_interaction_request_metadata_pb.js');
+var lens_overlay_interaction_request_metadata_pb = require('./lens_overlay_interaction_request_metadata_pb.cjs');
 goog.object.extend(proto, lens_overlay_interaction_request_metadata_pb);
-var lens_overlay_visual_search_interaction_log_data_pb = require('./lens_overlay_visual_search_interaction_log_data_pb.js');
+var lens_overlay_visual_search_interaction_log_data_pb = require('./lens_overlay_visual_search_interaction_log_data_pb.cjs');
 goog.object.extend(proto, lens_overlay_visual_search_interaction_log_data_pb);
 goog.exportSymbol('proto.lens.LensOverlayVisualSearchInteractionData', null, global);
 /**
@@ -20368,11 +20368,11 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_client_platform_pb = require('./lens_overlay_client_platform_pb.js');
+var lens_overlay_client_platform_pb = require('./lens_overlay_client_platform_pb.cjs');
 goog.object.extend(proto, lens_overlay_client_platform_pb);
-var lens_overlay_filters_pb = require('./lens_overlay_filters_pb.js');
+var lens_overlay_filters_pb = require('./lens_overlay_filters_pb.cjs');
 goog.object.extend(proto, lens_overlay_filters_pb);
-var lens_overlay_selection_type_pb = require('./lens_overlay_selection_type_pb.js');
+var lens_overlay_selection_type_pb = require('./lens_overlay_selection_type_pb.cjs');
 goog.object.extend(proto, lens_overlay_selection_type_pb);
 goog.exportSymbol('proto.lens.FilterData', null, global);
 goog.exportSymbol('proto.lens.LensOverlayVisualSearchInteractionLogData', null, global);

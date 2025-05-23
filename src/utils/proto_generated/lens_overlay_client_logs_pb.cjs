@@ -21,7 +21,7 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_phase_latencies_metadata_pb = require('./lens_overlay_phase_latencies_metadata_pb.js');
+var lens_overlay_phase_latencies_metadata_pb = require('./lens_overlay_phase_latencies_metadata_pb.cjs');
 goog.object.extend(proto, lens_overlay_phase_latencies_metadata_pb);
 goog.exportSymbol('proto.lens.LensOverlayClientLogs', null, global);
 goog.exportSymbol('proto.lens.LensOverlayClientLogs.LensOverlayEntryPoint', null, global);

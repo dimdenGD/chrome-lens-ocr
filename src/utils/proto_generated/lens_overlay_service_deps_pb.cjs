@@ -21,27 +21,27 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_client_context_pb = require('./lens_overlay_client_context_pb.js');
+var lens_overlay_client_context_pb = require('./lens_overlay_client_context_pb.cjs');
 goog.object.extend(proto, lens_overlay_client_context_pb);
-var lens_overlay_cluster_info_pb = require('./lens_overlay_cluster_info_pb.js');
+var lens_overlay_cluster_info_pb = require('./lens_overlay_cluster_info_pb.cjs');
 goog.object.extend(proto, lens_overlay_cluster_info_pb);
-var lens_overlay_deep_gleam_data_pb = require('./lens_overlay_deep_gleam_data_pb.js');
+var lens_overlay_deep_gleam_data_pb = require('./lens_overlay_deep_gleam_data_pb.cjs');
 goog.object.extend(proto, lens_overlay_deep_gleam_data_pb);
-var lens_overlay_document_pb = require('./lens_overlay_document_pb.js');
+var lens_overlay_document_pb = require('./lens_overlay_document_pb.cjs');
 goog.object.extend(proto, lens_overlay_document_pb);
-var lens_overlay_image_crop_pb = require('./lens_overlay_image_crop_pb.js');
+var lens_overlay_image_crop_pb = require('./lens_overlay_image_crop_pb.cjs');
 goog.object.extend(proto, lens_overlay_image_crop_pb);
-var lens_overlay_image_data_pb = require('./lens_overlay_image_data_pb.js');
+var lens_overlay_image_data_pb = require('./lens_overlay_image_data_pb.cjs');
 goog.object.extend(proto, lens_overlay_image_data_pb);
-var lens_overlay_interaction_request_metadata_pb = require('./lens_overlay_interaction_request_metadata_pb.js');
+var lens_overlay_interaction_request_metadata_pb = require('./lens_overlay_interaction_request_metadata_pb.cjs');
 goog.object.extend(proto, lens_overlay_interaction_request_metadata_pb);
-var lens_overlay_overlay_object_pb = require('./lens_overlay_overlay_object_pb.js');
+var lens_overlay_overlay_object_pb = require('./lens_overlay_overlay_object_pb.cjs');
 goog.object.extend(proto, lens_overlay_overlay_object_pb);
-var lens_overlay_request_id_pb = require('./lens_overlay_request_id_pb.js');
+var lens_overlay_request_id_pb = require('./lens_overlay_request_id_pb.cjs');
 goog.object.extend(proto, lens_overlay_request_id_pb);
-var lens_overlay_request_type_pb = require('./lens_overlay_request_type_pb.js');
+var lens_overlay_request_type_pb = require('./lens_overlay_request_type_pb.cjs');
 goog.object.extend(proto, lens_overlay_request_type_pb);
-var lens_overlay_text_pb = require('./lens_overlay_text_pb.js');
+var lens_overlay_text_pb = require('./lens_overlay_text_pb.cjs');
 goog.object.extend(proto, lens_overlay_text_pb);
 goog.exportSymbol('proto.lens.ChunkDebugMetadata', null, global);
 goog.exportSymbol('proto.lens.ChunkDebugOptions', null, global);

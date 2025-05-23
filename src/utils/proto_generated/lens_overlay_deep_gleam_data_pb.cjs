@@ -21,7 +21,7 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_text_pb = require('./lens_overlay_text_pb.js');
+var lens_overlay_text_pb = require('./lens_overlay_text_pb.cjs');
 goog.object.extend(proto, lens_overlay_text_pb);
 goog.exportSymbol('proto.lens.DeepGleamData', null, global);
 goog.exportSymbol('proto.lens.DeepGleamData.RenderingOneofCase', null, global);

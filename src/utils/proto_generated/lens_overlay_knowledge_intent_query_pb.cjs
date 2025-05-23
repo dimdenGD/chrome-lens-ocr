@@ -21,7 +21,7 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_translate_stickiness_signals_pb = require('./lens_overlay_translate_stickiness_signals_pb.js');
+var lens_overlay_translate_stickiness_signals_pb = require('./lens_overlay_translate_stickiness_signals_pb.cjs');
 goog.object.extend(proto, lens_overlay_translate_stickiness_signals_pb);
 goog.exportSymbol('proto.lens.Argument', null, global);
 goog.exportSymbol('proto.lens.ArgumentValue', null, global);

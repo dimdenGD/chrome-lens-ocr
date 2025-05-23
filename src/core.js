@@ -3,15 +3,17 @@ import setCookie from 'set-cookie-parser';
 import { LENS_PROTO_ENDPOINT, LENS_API_KEY, MIME_TO_EXT, EXT_TO_MIME, SUPPORTED_MIMES } from './consts.js';
 
 import { parseCookies, sleep } from './utils.js';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
-const { LensOverlayServerRequest, LensOverlayObjectsRequest, LensOverlayRequestContext, LensOverlayServerResponse, LensOverlayServerError, LensOverlayServerErrorErrorType } = require('./utils/proto_generated/lens_overlay_server_pb.js');
-const { LensOverlayClientContext, LocaleContext, ClientLoggingData } = require('./utils/proto_generated/lens_overlay_client_context_pb.js');
-const { Platform, Surface } = require('./utils/proto_generated/lens_overlay_client_platform_pb.js');
-const { ImageData, ImagePayload, ImageMetadata } = require('./utils/proto_generated/lens_overlay_image_data_pb.js');
-const { LensOverlayRequestId } = require('./utils/proto_generated/lens_overlay_request_id_pb.js');
-const { AppliedFilter, AppliedFilters, LensOverlayFilterType } = require('./utils/proto_generated/lens_overlay_filters_pb.js');
-const { Text, TextLayout, TextLayoutParagraph, TextLayoutLine, TextLayoutWord, WritingDirection, Alignment } = require('./utils/proto_generated/lens_overlay_text_pb.js');
-const { Geometry, CenterRotatedBox, CoordinateType } = require('./utils/proto_generated/lens_overlay_geometry_pb.js');
+const { LensOverlayServerRequest, LensOverlayObjectsRequest, LensOverlayRequestContext, LensOverlayServerResponse, LensOverlayServerError, LensOverlayServerErrorErrorType } = require('./utils/proto_generated/lens_overlay_server_pb.cjs');
+const { LensOverlayClientContext, LocaleContext, ClientLoggingData } = require('./utils/proto_generated/lens_overlay_client_context_pb.cjs');
+const { Platform, Surface } = require('./utils/proto_generated/lens_overlay_client_platform_pb.cjs');
+const { ImageData, ImagePayload, ImageMetadata } = require('./utils/proto_generated/lens_overlay_image_data_pb.cjs');
+const { LensOverlayRequestId } = require('./utils/proto_generated/lens_overlay_request_id_pb.cjs');
+const { AppliedFilter, AppliedFilters, LensOverlayFilterType } = require('./utils/proto_generated/lens_overlay_filters_pb.cjs');
+const { Text, TextLayout, TextLayoutParagraph, TextLayoutLine, TextLayoutWord, WritingDirection, Alignment } = require('./utils/proto_generated/lens_overlay_text_pb.cjs');
+const { Geometry, CenterRotatedBox, CoordinateType } = require('./utils/proto_generated/lens_overlay_geometry_pb.cjs');
 
 
 export class BoundingBox {

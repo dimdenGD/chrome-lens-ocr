@@ -21,11 +21,11 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var lens_overlay_filters_pb = require('./lens_overlay_filters_pb.js');
+var lens_overlay_filters_pb = require('./lens_overlay_filters_pb.cjs');
 goog.object.extend(proto, lens_overlay_filters_pb);
-var lens_overlay_platform_pb = require('./lens_overlay_platform_pb.js');
+var lens_overlay_platform_pb = require('./lens_overlay_platform_pb.cjs');
 goog.object.extend(proto, lens_overlay_platform_pb);
-var lens_overlay_surface_pb = require('./lens_overlay_surface_pb.js');
+var lens_overlay_surface_pb = require('./lens_overlay_surface_pb.cjs');
 goog.object.extend(proto, lens_overlay_surface_pb);
 goog.exportSymbol('proto.lens.ClientLoggingData', null, global);
 goog.exportSymbol('proto.lens.LensOverlayClientContext', null, global);
