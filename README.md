@@ -173,3 +173,12 @@ chrome-lens-ocr ./shrimple.png
 chrome-lens-ocr -d ./shrimple.png
 chrome-lens-ocr -d https://lune.dimden.dev/7949f833fa42.png
 ```
+# build push docker 
+
+docker build -t tinhthanh/vg-ocr-api .
+docker tag tinhthanh/vg-ocr-api tinhthanh/vg-ocr-api:v1.0.1
+docker push tinhthanh/vg-ocr-api:v1.0.1
+
+# run
+docker compose up
+

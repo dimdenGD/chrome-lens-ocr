@@ -1,0 +1,7 @@
+node_modules
+bin
+apple-ocr
+.git
+.github
+.env
+.run

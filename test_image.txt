@@ -1,0 +1,4 @@
+Hello World
+This is a test image
+OCR Testing
+123456789

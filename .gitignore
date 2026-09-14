@@ -3,3 +3,6 @@ test.js
 cookies.json
 afData.json
 bun.lock
+bin/
+.env
+.run/

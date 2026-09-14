@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  vg-ocr-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vg-ocr-api
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      # Optional: native server on the Mac host providing Apple Vision OCR,
+      # e.g. APPLE_OCR_URL=http://host.docker.internal:3001
+      - APPLE_OCR_URL=${APPLE_OCR_URL:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "node", "-e", "const http = require('http'); const options = { hostname: 'localhost', port: 3000, path: '/health', timeout: 2000 }; const req = http.request(options, (res) => { if (res.statusCode === 200) process.exit(0); else process.exit(1); }); req.on('error', () => process.exit(1)); req.on('timeout', () => process.exit(1)); req.end();"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ocr-network
+
+networks:
+  ocr-network:
+    driver: bridge

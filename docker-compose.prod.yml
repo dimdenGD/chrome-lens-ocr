@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  app:
+    image: ${DOCKERHUB_USERNAME}/${SERVICE_NAME}:latest
+    container_name: ${SERVICE_NAME}
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "node", "-e", "const http = require('http'); const options = { hostname: 'localhost', port: 3000, path: '/health', timeout: 2000 }; const req = http.request(options, (res) => { if (res.statusCode === 200) process.exit(0); else process.exit(1); }); req.on('error', () => process.exit(1)); req.on('timeout', () => process.exit(1)); req.end();"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.${SERVICE_NAME}.rule=HostRegexp(`^cluster\\..+`) && PathPrefix(`/${SERVICE_NAME}`)"
+      
+      - "traefik.http.routers.${SERVICE_NAME}.entrypoints=web"
+      - "traefik.http.routers.${SERVICE_NAME}.service=${SERVICE_NAME}-svc"
+      - "traefik.http.routers.${SERVICE_NAME}.middlewares=strip-prefix-${SERVICE_NAME}"
+      - "traefik.http.middlewares.strip-prefix-${SERVICE_NAME}.stripprefix.prefixes=/${SERVICE_NAME}"
+      - "traefik.http.services.${SERVICE_NAME}-svc.loadbalancer.server.port=3000"
+
+    networks:
+      - traefik_proxy
+
+networks:
+  traefik_proxy:
+    external: true
